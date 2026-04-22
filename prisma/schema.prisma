@@ -14,16 +14,33 @@ generator client {
 
 
 model User {
-  id                      String         @id @default(uuid())
-  name                    String         @unique
-  gender                  String?
-  gender_probability      Float 
-  sample_size             Int
-  age                     Int?
-  age_group               String
-  country_id               String
-  country_probability      Float
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
+  id                     String   @id @default(uuid())
+  name                   String   @unique
 
+  gender                 String?
+  gender_probability     Float
+
+  country_name           String
+  country_id             String
+  country_probability    Float
+
+  age                    Int?
+  age_group              String
+
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+
+  @@index([gender])
+  @@index([age])
+  @@index([country_id])
+  @@index([age_group])
+  @@index([gender_probability])
+  @@index([country_probability])
+  @@index([createdAt])
+
+ 
+  @@index([gender, age])
+  @@index([country_id, age])
+  @@index([gender, country_id])
+}

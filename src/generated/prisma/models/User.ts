@@ -28,14 +28,12 @@ export type AggregateUser = {
 
 export type UserAvgAggregateOutputType = {
   gender_probability: number | null
-  sample_size: number | null
   age: number | null
   country_probability: number | null
 }
 
 export type UserSumAggregateOutputType = {
   gender_probability: number | null
-  sample_size: number | null
   age: number | null
   country_probability: number | null
 }
@@ -45,7 +43,7 @@ export type UserMinAggregateOutputType = {
   name: string | null
   gender: string | null
   gender_probability: number | null
-  sample_size: number | null
+  country_name: string | null
   age: number | null
   age_group: string | null
   country_id: string | null
@@ -59,7 +57,7 @@ export type UserMaxAggregateOutputType = {
   name: string | null
   gender: string | null
   gender_probability: number | null
-  sample_size: number | null
+  country_name: string | null
   age: number | null
   age_group: string | null
   country_id: string | null
@@ -73,7 +71,7 @@ export type UserCountAggregateOutputType = {
   name: number
   gender: number
   gender_probability: number
-  sample_size: number
+  country_name: number
   age: number
   age_group: number
   country_id: number
@@ -86,14 +84,12 @@ export type UserCountAggregateOutputType = {
 
 export type UserAvgAggregateInputType = {
   gender_probability?: true
-  sample_size?: true
   age?: true
   country_probability?: true
 }
 
 export type UserSumAggregateInputType = {
   gender_probability?: true
-  sample_size?: true
   age?: true
   country_probability?: true
 }
@@ -103,7 +99,7 @@ export type UserMinAggregateInputType = {
   name?: true
   gender?: true
   gender_probability?: true
-  sample_size?: true
+  country_name?: true
   age?: true
   age_group?: true
   country_id?: true
@@ -117,7 +113,7 @@ export type UserMaxAggregateInputType = {
   name?: true
   gender?: true
   gender_probability?: true
-  sample_size?: true
+  country_name?: true
   age?: true
   age_group?: true
   country_id?: true
@@ -131,7 +127,7 @@ export type UserCountAggregateInputType = {
   name?: true
   gender?: true
   gender_probability?: true
-  sample_size?: true
+  country_name?: true
   age?: true
   age_group?: true
   country_id?: true
@@ -232,7 +228,7 @@ export type UserGroupByOutputType = {
   name: string
   gender: string | null
   gender_probability: number
-  sample_size: number
+  country_name: string
   age: number | null
   age_group: string
   country_id: string
@@ -269,7 +265,7 @@ export type UserWhereInput = {
   name?: Prisma.StringFilter<"User"> | string
   gender?: Prisma.StringNullableFilter<"User"> | string | null
   gender_probability?: Prisma.FloatFilter<"User"> | number
-  sample_size?: Prisma.IntFilter<"User"> | number
+  country_name?: Prisma.StringFilter<"User"> | string
   age?: Prisma.IntNullableFilter<"User"> | number | null
   age_group?: Prisma.StringFilter<"User"> | string
   country_id?: Prisma.StringFilter<"User"> | string
@@ -283,7 +279,7 @@ export type UserOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   gender?: Prisma.SortOrderInput | Prisma.SortOrder
   gender_probability?: Prisma.SortOrder
-  sample_size?: Prisma.SortOrder
+  country_name?: Prisma.SortOrder
   age?: Prisma.SortOrderInput | Prisma.SortOrder
   age_group?: Prisma.SortOrder
   country_id?: Prisma.SortOrder
@@ -300,7 +296,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   gender?: Prisma.StringNullableFilter<"User"> | string | null
   gender_probability?: Prisma.FloatFilter<"User"> | number
-  sample_size?: Prisma.IntFilter<"User"> | number
+  country_name?: Prisma.StringFilter<"User"> | string
   age?: Prisma.IntNullableFilter<"User"> | number | null
   age_group?: Prisma.StringFilter<"User"> | string
   country_id?: Prisma.StringFilter<"User"> | string
@@ -314,7 +310,7 @@ export type UserOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   gender?: Prisma.SortOrderInput | Prisma.SortOrder
   gender_probability?: Prisma.SortOrder
-  sample_size?: Prisma.SortOrder
+  country_name?: Prisma.SortOrder
   age?: Prisma.SortOrderInput | Prisma.SortOrder
   age_group?: Prisma.SortOrder
   country_id?: Prisma.SortOrder
@@ -336,7 +332,7 @@ export type UserScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"User"> | string
   gender?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   gender_probability?: Prisma.FloatWithAggregatesFilter<"User"> | number
-  sample_size?: Prisma.IntWithAggregatesFilter<"User"> | number
+  country_name?: Prisma.StringWithAggregatesFilter<"User"> | string
   age?: Prisma.IntNullableWithAggregatesFilter<"User"> | number | null
   age_group?: Prisma.StringWithAggregatesFilter<"User"> | string
   country_id?: Prisma.StringWithAggregatesFilter<"User"> | string
@@ -350,7 +346,7 @@ export type UserCreateInput = {
   name: string
   gender?: string | null
   gender_probability: number
-  sample_size: number
+  country_name: string
   age?: number | null
   age_group: string
   country_id: string
@@ -364,7 +360,7 @@ export type UserUncheckedCreateInput = {
   name: string
   gender?: string | null
   gender_probability: number
-  sample_size: number
+  country_name: string
   age?: number | null
   age_group: string
   country_id: string
@@ -378,7 +374,7 @@ export type UserUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gender_probability?: Prisma.FloatFieldUpdateOperationsInput | number
-  sample_size?: Prisma.IntFieldUpdateOperationsInput | number
+  country_name?: Prisma.StringFieldUpdateOperationsInput | string
   age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   age_group?: Prisma.StringFieldUpdateOperationsInput | string
   country_id?: Prisma.StringFieldUpdateOperationsInput | string
@@ -392,7 +388,7 @@ export type UserUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gender_probability?: Prisma.FloatFieldUpdateOperationsInput | number
-  sample_size?: Prisma.IntFieldUpdateOperationsInput | number
+  country_name?: Prisma.StringFieldUpdateOperationsInput | string
   age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   age_group?: Prisma.StringFieldUpdateOperationsInput | string
   country_id?: Prisma.StringFieldUpdateOperationsInput | string
@@ -406,7 +402,7 @@ export type UserCreateManyInput = {
   name: string
   gender?: string | null
   gender_probability: number
-  sample_size: number
+  country_name: string
   age?: number | null
   age_group: string
   country_id: string
@@ -420,7 +416,7 @@ export type UserUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gender_probability?: Prisma.FloatFieldUpdateOperationsInput | number
-  sample_size?: Prisma.IntFieldUpdateOperationsInput | number
+  country_name?: Prisma.StringFieldUpdateOperationsInput | string
   age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   age_group?: Prisma.StringFieldUpdateOperationsInput | string
   country_id?: Prisma.StringFieldUpdateOperationsInput | string
@@ -434,7 +430,7 @@ export type UserUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gender_probability?: Prisma.FloatFieldUpdateOperationsInput | number
-  sample_size?: Prisma.IntFieldUpdateOperationsInput | number
+  country_name?: Prisma.StringFieldUpdateOperationsInput | string
   age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   age_group?: Prisma.StringFieldUpdateOperationsInput | string
   country_id?: Prisma.StringFieldUpdateOperationsInput | string
@@ -448,7 +444,7 @@ export type UserCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   gender?: Prisma.SortOrder
   gender_probability?: Prisma.SortOrder
-  sample_size?: Prisma.SortOrder
+  country_name?: Prisma.SortOrder
   age?: Prisma.SortOrder
   age_group?: Prisma.SortOrder
   country_id?: Prisma.SortOrder
@@ -459,7 +455,6 @@ export type UserCountOrderByAggregateInput = {
 
 export type UserAvgOrderByAggregateInput = {
   gender_probability?: Prisma.SortOrder
-  sample_size?: Prisma.SortOrder
   age?: Prisma.SortOrder
   country_probability?: Prisma.SortOrder
 }
@@ -469,7 +464,7 @@ export type UserMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   gender?: Prisma.SortOrder
   gender_probability?: Prisma.SortOrder
-  sample_size?: Prisma.SortOrder
+  country_name?: Prisma.SortOrder
   age?: Prisma.SortOrder
   age_group?: Prisma.SortOrder
   country_id?: Prisma.SortOrder
@@ -483,7 +478,7 @@ export type UserMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   gender?: Prisma.SortOrder
   gender_probability?: Prisma.SortOrder
-  sample_size?: Prisma.SortOrder
+  country_name?: Prisma.SortOrder
   age?: Prisma.SortOrder
   age_group?: Prisma.SortOrder
   country_id?: Prisma.SortOrder
@@ -494,7 +489,6 @@ export type UserMinOrderByAggregateInput = {
 
 export type UserSumOrderByAggregateInput = {
   gender_probability?: Prisma.SortOrder
-  sample_size?: Prisma.SortOrder
   age?: Prisma.SortOrder
   country_probability?: Prisma.SortOrder
 }
@@ -508,14 +502,6 @@ export type NullableStringFieldUpdateOperationsInput = {
 }
 
 export type FloatFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
-export type IntFieldUpdateOperationsInput = {
   set?: number
   increment?: number
   decrement?: number
@@ -542,7 +528,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   name?: boolean
   gender?: boolean
   gender_probability?: boolean
-  sample_size?: boolean
+  country_name?: boolean
   age?: boolean
   age_group?: boolean
   country_id?: boolean
@@ -556,7 +542,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   name?: boolean
   gender?: boolean
   gender_probability?: boolean
-  sample_size?: boolean
+  country_name?: boolean
   age?: boolean
   age_group?: boolean
   country_id?: boolean
@@ -570,7 +556,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   name?: boolean
   gender?: boolean
   gender_probability?: boolean
-  sample_size?: boolean
+  country_name?: boolean
   age?: boolean
   age_group?: boolean
   country_id?: boolean
@@ -584,7 +570,7 @@ export type UserSelectScalar = {
   name?: boolean
   gender?: boolean
   gender_probability?: boolean
-  sample_size?: boolean
+  country_name?: boolean
   age?: boolean
   age_group?: boolean
   country_id?: boolean
@@ -593,7 +579,7 @@ export type UserSelectScalar = {
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "gender" | "gender_probability" | "sample_size" | "age" | "age_group" | "country_id" | "country_probability" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "gender" | "gender_probability" | "country_name" | "age" | "age_group" | "country_id" | "country_probability" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
@@ -603,7 +589,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     name: string
     gender: string | null
     gender_probability: number
-    sample_size: number
+    country_name: string
     age: number | null
     age_group: string
     country_id: string
@@ -1037,7 +1023,7 @@ export interface UserFieldRefs {
   readonly name: Prisma.FieldRef<"User", 'String'>
   readonly gender: Prisma.FieldRef<"User", 'String'>
   readonly gender_probability: Prisma.FieldRef<"User", 'Float'>
-  readonly sample_size: Prisma.FieldRef<"User", 'Int'>
+  readonly country_name: Prisma.FieldRef<"User", 'String'>
   readonly age: Prisma.FieldRef<"User", 'Int'>
   readonly age_group: Prisma.FieldRef<"User", 'String'>
   readonly country_id: Prisma.FieldRef<"User", 'String'>

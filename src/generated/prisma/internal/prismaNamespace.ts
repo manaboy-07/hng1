@@ -522,7 +522,7 @@ export const UserScalarFieldEnum = {
   name: 'name',
   gender: 'gender',
   gender_probability: 'gender_probability',
-  sample_size: 'sample_size',
+  country_name: 'country_name',
   age: 'age',
   age_group: 'age_group',
   country_id: 'country_id',

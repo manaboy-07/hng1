@@ -21,19 +21,24 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @Get('profiles/:id')
-  async getProfileByID(@Param('id') id: string) {
-    return await this.appService.GetProfileByID(id);
-  }
+  // @Post('profiles')
+  // async createProfile(@Body() createDto: CreateDto) {
+  //   return await this.appService.createProfile(createDto);
+  // }
 
-  @Post('profiles')
-  async createProfile(@Body() createDto: CreateDto) {
-    return await this.appService.createProfile(createDto);
+  @Get('profiles/search')
+  async searchProfiles(@Query() query: string) {
+    return await this.appService.SearchProfiles(query);
   }
 
   @Get('profiles')
   async getAllProfiles(@Query() query: QueryDto) {
     return await this.appService.GetAllProfiles(query);
+  }
+
+  @Get('profiles/:id')
+  async getProfileByID(@Param('id') id: string) {
+    return await this.appService.GetProfileByID(id);
   }
 
   @Delete('profiles/:id')

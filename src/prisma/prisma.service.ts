@@ -27,3 +27,4 @@ export class PrismaService
     console.log('Prisma disconnected from database');
   }
 }
+

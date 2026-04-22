@@ -29,10 +29,17 @@ export interface ModifiedResponse {
     name: string;
     gender: string | null;
     gender_probability: number;
-    sample_size: number;
+    country_name: number;
     age: number | null;
     age_group: string;
     country_id: string;
     country_probability: number;
   };
+}
+
+export interface searchQuery {
+  gender?: 'male' | 'female';
+  min_age?: number | undefined;
+  max_age?: number | undefined;
+  possibleCountry?: string;
 }
