@@ -144,21 +144,23 @@ export class AppService {
       data: userExist,
     };
   }
+
   async GetAllProfiles(query: QueryDto) {
-    const specifiedOrder = ['asc', 'desc'];
-    const sortMap = {
+    const sortMap: Record<string, keyof Prisma.UserOrderByWithRelationInput> = {
       age: 'age',
       created_at: 'createdAt',
       gender_probability: 'gender_probability',
     };
+
+    const allowedOrder = ['asc', 'desc'] as const;
 
     const {
       age_group,
       country_id,
       gender,
       max_age,
-      max_gender_probability,
       min_age,
+      max_gender_probability,
       min_gender_probability,
       min_country_probability,
       limit,
@@ -166,6 +168,7 @@ export class AppService {
       order,
       sort_by,
     } = query;
+
     const queries: Prisma.UserWhereInput = {
       ...(gender && {
         gender: {
@@ -188,7 +191,7 @@ export class AppService {
         },
       }),
 
-      ...(min_age || max_age
+      ...(min_age !== undefined || max_age !== undefined
         ? {
             age: {
               ...(min_age !== undefined && { gte: Number(min_age) }),
@@ -197,58 +200,82 @@ export class AppService {
           }
         : {}),
 
-      ...(min_gender_probability || max_gender_probability
+      ...(min_gender_probability !== undefined ||
+      max_gender_probability !== undefined
         ? {
             gender_probability: {
-              ...(min_gender_probability && {
+              ...(min_gender_probability !== undefined && {
                 gte: Number(min_gender_probability),
               }),
-              ...(max_gender_probability && {
+              ...(max_gender_probability !== undefined && {
                 lte: Number(max_gender_probability),
               }),
             },
           }
         : {}),
 
-      ...(min_country_probability && {
+      ...(min_country_probability !== undefined && {
         country_probability: {
           gte: Number(min_country_probability),
         },
       }),
     };
 
-    if (sort_by && !Object.keys(sortMap).includes(sort_by)) {
-      return { status: 'error', message: 'Invalid query parameters' };
+    const normalizedSortBy = sort_by?.toLowerCase();
+
+    if (sort_by && !sortMap[normalizedSortBy as keyof typeof sortMap]) {
+      return {
+        status: 'error',
+        message: 'Invalid query parameters',
+      };
     }
-    if (order && !specifiedOrder.includes(order)) {
-      return { status: 'error', message: 'Invalid query parameters' };
+
+    if (order && !allowedOrder.includes(order as any)) {
+      return {
+        status: 'error',
+        message: 'Invalid query parameters',
+      };
     }
+
+    if ((page && isNaN(Number(page))) || (limit && isNaN(Number(limit)))) {
+      return {
+        status: 'error',
+        message: 'Invalid query parameters',
+      };
+    }
+
     const pageNumber = Math.max(1, Number(page) || 1);
     const limitNumber = Math.min(50, Math.max(1, Number(limit) || 10));
     const skip = (pageNumber - 1) * limitNumber;
 
-    if ((page && isNaN(Number(page))) || (limit && isNaN(Number(limit)))) {
-      return { status: 'error', message: 'Invalid query parameters' };
+    let orderBy: Prisma.UserOrderByWithRelationInput;
+
+    if (sort_by) {
+      const key = sortMap[normalizedSortBy as keyof typeof sortMap];
+
+      orderBy = {
+        [key]: (order || 'desc') as Prisma.SortOrder,
+      };
+    } else {
+      orderBy = {
+        createdAt: 'desc',
+      };
     }
+
     const data = await this.prisma.user.findMany({
       where: queries,
       skip,
       take: limitNumber,
-      orderBy: sort_by
-        ? {
-            [sortMap[sort_by]]: order || 'desc',
-          }
-        : {
-            createdAt: 'desc',
-          },
+      orderBy,
     });
 
-    const count = await this.prisma.user.count({ where: queries });
+    const total = await this.prisma.user.count({ where: queries });
+
     return {
       status: 'success',
       page: pageNumber,
       limit: limitNumber,
-      total: count,
+      total,
       data,
     };
   }
@@ -256,14 +283,18 @@ export class AppService {
     const { q } = searchQuery;
 
     if (!q) {
-      return { status: 'error', message: 'Unable to interpret query' };
+      return {
+        status: 'error',
+        message: 'Unable to interpret query',
+      };
     }
 
-    const parsed = parseQuery(q.toLowerCase());
+    const parsed = parseQuery(q);
+
     if (!parsed) {
       return {
         status: 'error',
-        message: 'Unable to interprete query',
+        message: 'Unable to interpret query',
       };
     }
 
@@ -272,13 +303,21 @@ export class AppService {
     if (parsed.gender) {
       where.gender = parsed.gender;
     }
+
     if (parsed.age_group) {
       where.age_group = parsed.age_group;
     }
-    if (parsed.min_age || parsed.max_age) {
+
+    if (parsed.min_age !== undefined || parsed.max_age !== undefined) {
       where.age = {};
-      if (parsed.min_age !== undefined) where.age.gte = parsed.min_age;
-      if (parsed.max_age !== undefined) where.age.lte = parsed.max_age;
+
+      if (parsed.min_age !== undefined) {
+        where.age.gte = parsed.min_age;
+      }
+
+      if (parsed.max_age !== undefined) {
+        where.age.lte = parsed.max_age;
+      }
     }
 
     if (parsed.possibleCountry) {
@@ -295,26 +334,28 @@ export class AppService {
         message: 'Unable to interpret query',
       };
     }
+
     if (
       (searchQuery.page && isNaN(Number(searchQuery.page))) ||
       (searchQuery.limit && isNaN(Number(searchQuery.limit)))
     ) {
-      return { status: 'error', message: 'Invalid query parameters' };
+      return {
+        status: 'error',
+        message: 'Invalid query parameters',
+      };
     }
 
-    // Pagination
     const page = Math.max(1, Number(searchQuery.page) || 1);
     const limit = Math.min(50, Math.max(1, Number(searchQuery.limit) || 10));
     const skip = (page - 1) * limit;
 
-    const [data, total] = await Promise.all([
-      this.prisma.user.findMany({
-        where,
-        skip,
-        take: limit,
-      }),
-      this.prisma.user.count({ where }),
-    ]);
+    const data = await this.prisma.user.findMany({
+      where,
+      skip,
+      take: limit,
+    });
+
+    const total = await this.prisma.user.count({ where });
 
     return {
       status: 'success',
