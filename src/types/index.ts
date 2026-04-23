@@ -38,7 +38,7 @@ export interface ModifiedResponse {
 }
 
 export interface searchQuery {
-  gender?: 'male' | 'female';
+  gender: any;
   min_age?: number | undefined;
   max_age?: number | undefined;
   possibleCountry?: string;

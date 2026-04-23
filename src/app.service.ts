@@ -145,8 +145,12 @@ export class AppService {
     };
   }
   async GetAllProfiles(query: QueryDto) {
-    const sortFields = ['age', 'createdAt', 'gender_probability'];
     const specifiedOrder = ['asc', 'desc'];
+    const sortMap = {
+      age: 'age',
+      created_at: 'createdAt',
+      gender_probability: 'gender_probability',
+    };
 
     const {
       age_group,
@@ -187,8 +191,8 @@ export class AppService {
       ...(min_age || max_age
         ? {
             age: {
-              ...(min_age && { gte: Number(min_age) }),
-              ...(max_age && { lte: Number(max_age) }),
+              ...(min_age !== undefined && { gte: Number(min_age) }),
+              ...(max_age !== undefined && { lte: Number(max_age) }),
             },
           }
         : {}),
@@ -213,7 +217,7 @@ export class AppService {
       }),
     };
 
-    if (sort_by && !sortFields.includes(sort_by)) {
+    if (sort_by && !Object.keys(sortMap).includes(sort_by)) {
       return { status: 'error', message: 'Invalid query parameters' };
     }
     if (order && !specifiedOrder.includes(order)) {
@@ -223,29 +227,27 @@ export class AppService {
     const limitNumber = Math.min(50, Math.max(1, Number(limit) || 10));
     const skip = (pageNumber - 1) * limitNumber;
 
-    if (isNaN(pageNumber) || isNaN(limitNumber)) {
+    if ((page && isNaN(Number(page))) || (limit && isNaN(Number(limit)))) {
       return { status: 'error', message: 'Invalid query parameters' };
     }
-    const [data, count] = await this.prisma.$transaction([
-      this.prisma.user.findMany({
-        where: queries,
-        skip,
-        take: limitNumber,
-        orderBy: sort_by
-          ? {
-              [sort_by === 'created_at' ? 'createdAt' : sort_by]:
-                order || 'desc',
-            }
-          : {
-              createdAt: 'desc',
-            },
-      }),
-      this.prisma.user.count({ where: queries }),
-    ]);
+    const data = await this.prisma.user.findMany({
+      where: queries,
+      skip,
+      take: limitNumber,
+      orderBy: sort_by
+        ? {
+            [sortMap[sort_by]]: order || 'desc',
+          }
+        : {
+            createdAt: 'desc',
+          },
+    });
+
+    const count = await this.prisma.user.count({ where: queries });
     return {
       status: 'success',
       page: pageNumber,
-      limi: limitNumber,
+      limit: limitNumber,
       total: count,
       data,
     };
@@ -258,17 +260,25 @@ export class AppService {
     }
 
     const parsed = parseQuery(q.toLowerCase());
+    if (!parsed) {
+      return {
+        status: 'error',
+        message: 'Unable to interprete query',
+      };
+    }
 
     const where: any = {};
 
     if (parsed.gender) {
       where.gender = parsed.gender;
     }
-
+    if (parsed.age_group) {
+      where.age_group = parsed.age_group;
+    }
     if (parsed.min_age || parsed.max_age) {
       where.age = {};
-      if (parsed.min_age) where.age.gte = parsed.min_age;
-      if (parsed.max_age) where.age.lte = parsed.max_age;
+      if (parsed.min_age !== undefined) where.age.gte = parsed.min_age;
+      if (parsed.max_age !== undefined) where.age.lte = parsed.max_age;
     }
 
     if (parsed.possibleCountry) {
@@ -285,13 +295,19 @@ export class AppService {
         message: 'Unable to interpret query',
       };
     }
+    if (
+      (searchQuery.page && isNaN(Number(searchQuery.page))) ||
+      (searchQuery.limit && isNaN(Number(searchQuery.limit)))
+    ) {
+      return { status: 'error', message: 'Invalid query parameters' };
+    }
 
     // Pagination
     const page = Math.max(1, Number(searchQuery.page) || 1);
     const limit = Math.min(50, Math.max(1, Number(searchQuery.limit) || 10));
     const skip = (page - 1) * limit;
 
-    const [data, total] = await this.prisma.$transaction([
+    const [data, total] = await Promise.all([
       this.prisma.user.findMany({
         where,
         skip,
