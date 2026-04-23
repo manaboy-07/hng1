@@ -23,18 +23,18 @@
 
 An HNG TASK
 
-# 🧠 Intelligence Query Engine API
+# Intelligence Query Engine API
 
-## 📌 Overview
+## Overview
 
-This project is a backend-powered **Queryable Intelligence Engine** built for Insighta Labs.
+This project is a backend-powered **Queryable Intelligence Engine** .
 It transforms raw demographic data into a **powerful, queryable system** that allows clients to filter, sort, paginate, and even query data using natural language.
 
 ---
 
-## 🚀 Features
+## Features
 
-### ✅ Advanced Filtering
+### Advanced Filtering
 
 - Filter profiles using:
   - `gender`
@@ -54,21 +54,83 @@ GET /api/profiles?gender=male&country_id=NG&min_age=25
 
 ---
 
-### 🔃 Sorting
+### Sorting
 
 - `sort_by`: `age | created_at | gender_probability`
 - `order`: `asc | desc`
 
 **Example:**
 
-````
+```
 GET /api/profiles?sort_by=age&order=desc
+
+```
+
+### Pagination
+
+- `page` (default: 1)
+- `limit` (default: 10, max: 50)
+
+**Response Format:**
+
+```json
+{
+  "status": "success",
+  "page": 1,
+  "limit": 10,
+  "total": 2026,
+  "data": []
+}
+```
+
+### Query Validation
+
+Invalid query parameters return:
+
+```json
+{
+  "status": "error",
+  "message": "Invalid query parameters"
+}
+```
+
+---
+
+## Database Schema
+
+```prisma
+model User {
+  id                     String   @id @default(uuid())
+  name                   String   @unique
+  gender                 String?
+  gender_probability     Float
+  age                    Int?
+  age_group              String
+  country_id             String
+  country_name           String
+  country_probability    Float
+  createdAt              DateTime @default(now())
+}
+```
+
+---
+
+## Data Seeding
+
+- Seed database with **2026 profiles**
+- Duplicate-safe seeding supported
+
+**Run:**
+
+```
+npx prisma db seed
+```
 
 ## Project setup
 
 ```bash
 $ npm install
-````
+```
 
 ## Compile and run the project
 
