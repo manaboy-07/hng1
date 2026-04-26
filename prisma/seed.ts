@@ -10,19 +10,19 @@ const adapter = new PrismaPg({
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  for (const user of profiles.profiles) {
-    await prisma.user.upsert({
-      where: { name: user.name },
+  for (const profile of profiles.profiles) {
+    await prisma.profile.upsert({
+      where: { name: profile.name },
       update: {},
       create: {
-        name: user.name,
-        gender: user.gender,
-        gender_probability: user.gender_probability,
-        age: user.age,
-        age_group: user.age_group,
-        country_id: user.country_id,
-        country_probability: user.country_probability,
-        country_name: user.country_name,
+        name: profile.name,
+        gender: profile.gender,
+        gender_probability: profile.gender_probability,
+        age: profile.age,
+        age_group: profile.age_group,
+        country_id: profile.country_id,
+        country_probability: profile.country_probability,
+        country_name: profile.country_name,
       },
     });
   }

@@ -20,118 +20,86 @@ export type UserModel = runtime.Types.Result.DefaultSelection<Prisma.$UserPayloa
 
 export type AggregateUser = {
   _count: UserCountAggregateOutputType | null
-  _avg: UserAvgAggregateOutputType | null
-  _sum: UserSumAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
 }
 
-export type UserAvgAggregateOutputType = {
-  gender_probability: number | null
-  age: number | null
-  country_probability: number | null
-}
-
-export type UserSumAggregateOutputType = {
-  gender_probability: number | null
-  age: number | null
-  country_probability: number | null
-}
-
 export type UserMinAggregateOutputType = {
   id: string | null
-  name: string | null
-  gender: string | null
-  gender_probability: number | null
-  country_name: string | null
-  age: number | null
-  age_group: string | null
-  country_id: string | null
-  country_probability: number | null
+  github_id: string | null
+  username: string | null
+  email: string | null
+  avatar_url: string | null
+  role: $Enums.Role | null
+  is_active: boolean | null
+  last_login_at: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
 
 export type UserMaxAggregateOutputType = {
   id: string | null
-  name: string | null
-  gender: string | null
-  gender_probability: number | null
-  country_name: string | null
-  age: number | null
-  age_group: string | null
-  country_id: string | null
-  country_probability: number | null
+  github_id: string | null
+  username: string | null
+  email: string | null
+  avatar_url: string | null
+  role: $Enums.Role | null
+  is_active: boolean | null
+  last_login_at: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
 
 export type UserCountAggregateOutputType = {
   id: number
-  name: number
-  gender: number
-  gender_probability: number
-  country_name: number
-  age: number
-  age_group: number
-  country_id: number
-  country_probability: number
+  github_id: number
+  username: number
+  email: number
+  avatar_url: number
+  role: number
+  is_active: number
+  last_login_at: number
   createdAt: number
   updatedAt: number
   _all: number
 }
 
 
-export type UserAvgAggregateInputType = {
-  gender_probability?: true
-  age?: true
-  country_probability?: true
-}
-
-export type UserSumAggregateInputType = {
-  gender_probability?: true
-  age?: true
-  country_probability?: true
-}
-
 export type UserMinAggregateInputType = {
   id?: true
-  name?: true
-  gender?: true
-  gender_probability?: true
-  country_name?: true
-  age?: true
-  age_group?: true
-  country_id?: true
-  country_probability?: true
+  github_id?: true
+  username?: true
+  email?: true
+  avatar_url?: true
+  role?: true
+  is_active?: true
+  last_login_at?: true
   createdAt?: true
   updatedAt?: true
 }
 
 export type UserMaxAggregateInputType = {
   id?: true
-  name?: true
-  gender?: true
-  gender_probability?: true
-  country_name?: true
-  age?: true
-  age_group?: true
-  country_id?: true
-  country_probability?: true
+  github_id?: true
+  username?: true
+  email?: true
+  avatar_url?: true
+  role?: true
+  is_active?: true
+  last_login_at?: true
   createdAt?: true
   updatedAt?: true
 }
 
 export type UserCountAggregateInputType = {
   id?: true
-  name?: true
-  gender?: true
-  gender_probability?: true
-  country_name?: true
-  age?: true
-  age_group?: true
-  country_id?: true
-  country_probability?: true
+  github_id?: true
+  username?: true
+  email?: true
+  avatar_url?: true
+  role?: true
+  is_active?: true
+  last_login_at?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -175,18 +143,6 @@ export type UserAggregateArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
-   * Select which fields to average
-  **/
-  _avg?: UserAvgAggregateInputType
-  /**
-   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-   * 
-   * Select which fields to sum
-  **/
-  _sum?: UserSumAggregateInputType
-  /**
-   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-   * 
    * Select which fields to find the minimum value
   **/
   _min?: UserMinAggregateInputType
@@ -217,27 +173,22 @@ export type UserGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   _count?: UserCountAggregateInputType | true
-  _avg?: UserAvgAggregateInputType
-  _sum?: UserSumAggregateInputType
   _min?: UserMinAggregateInputType
   _max?: UserMaxAggregateInputType
 }
 
 export type UserGroupByOutputType = {
   id: string
-  name: string
-  gender: string | null
-  gender_probability: number
-  country_name: string
-  age: number | null
-  age_group: string
-  country_id: string
-  country_probability: number
+  github_id: string
+  username: string
+  email: string | null
+  avatar_url: string | null
+  role: $Enums.Role
+  is_active: boolean
+  last_login_at: Date | null
   createdAt: Date
   updatedAt: Date
   _count: UserCountAggregateOutputType | null
-  _avg: UserAvgAggregateOutputType | null
-  _sum: UserSumAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
 }
@@ -262,66 +213,60 @@ export type UserWhereInput = {
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   id?: Prisma.StringFilter<"User"> | string
-  name?: Prisma.StringFilter<"User"> | string
-  gender?: Prisma.StringNullableFilter<"User"> | string | null
-  gender_probability?: Prisma.FloatFilter<"User"> | number
-  country_name?: Prisma.StringFilter<"User"> | string
-  age?: Prisma.IntNullableFilter<"User"> | number | null
-  age_group?: Prisma.StringFilter<"User"> | string
-  country_id?: Prisma.StringFilter<"User"> | string
-  country_probability?: Prisma.FloatFilter<"User"> | number
+  github_id?: Prisma.StringFilter<"User"> | string
+  username?: Prisma.StringFilter<"User"> | string
+  email?: Prisma.StringNullableFilter<"User"> | string | null
+  avatar_url?: Prisma.StringNullableFilter<"User"> | string | null
+  role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
+  is_active?: Prisma.BoolFilter<"User"> | boolean
+  last_login_at?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
 }
 
 export type UserOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  name?: Prisma.SortOrder
-  gender?: Prisma.SortOrderInput | Prisma.SortOrder
-  gender_probability?: Prisma.SortOrder
-  country_name?: Prisma.SortOrder
-  age?: Prisma.SortOrderInput | Prisma.SortOrder
-  age_group?: Prisma.SortOrder
-  country_id?: Prisma.SortOrder
-  country_probability?: Prisma.SortOrder
+  github_id?: Prisma.SortOrder
+  username?: Prisma.SortOrder
+  email?: Prisma.SortOrderInput | Prisma.SortOrder
+  avatar_url?: Prisma.SortOrderInput | Prisma.SortOrder
+  role?: Prisma.SortOrder
+  is_active?: Prisma.SortOrder
+  last_login_at?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  name?: string
+  github_id?: string
+  email?: string
   AND?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
-  gender?: Prisma.StringNullableFilter<"User"> | string | null
-  gender_probability?: Prisma.FloatFilter<"User"> | number
-  country_name?: Prisma.StringFilter<"User"> | string
-  age?: Prisma.IntNullableFilter<"User"> | number | null
-  age_group?: Prisma.StringFilter<"User"> | string
-  country_id?: Prisma.StringFilter<"User"> | string
-  country_probability?: Prisma.FloatFilter<"User"> | number
+  username?: Prisma.StringFilter<"User"> | string
+  avatar_url?: Prisma.StringNullableFilter<"User"> | string | null
+  role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
+  is_active?: Prisma.BoolFilter<"User"> | boolean
+  last_login_at?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
-}, "id" | "name">
+}, "id" | "github_id" | "email">
 
 export type UserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  name?: Prisma.SortOrder
-  gender?: Prisma.SortOrderInput | Prisma.SortOrder
-  gender_probability?: Prisma.SortOrder
-  country_name?: Prisma.SortOrder
-  age?: Prisma.SortOrderInput | Prisma.SortOrder
-  age_group?: Prisma.SortOrder
-  country_id?: Prisma.SortOrder
-  country_probability?: Prisma.SortOrder
+  github_id?: Prisma.SortOrder
+  username?: Prisma.SortOrder
+  email?: Prisma.SortOrderInput | Prisma.SortOrder
+  avatar_url?: Prisma.SortOrderInput | Prisma.SortOrder
+  role?: Prisma.SortOrder
+  is_active?: Prisma.SortOrder
+  last_login_at?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
-  _avg?: Prisma.UserAvgOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
   _min?: Prisma.UserMinOrderByAggregateInput
-  _sum?: Prisma.UserSumOrderByAggregateInput
 }
 
 export type UserScalarWhereWithAggregatesInput = {
@@ -329,271 +274,227 @@ export type UserScalarWhereWithAggregatesInput = {
   OR?: Prisma.UserScalarWhereWithAggregatesInput[]
   NOT?: Prisma.UserScalarWhereWithAggregatesInput | Prisma.UserScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"User"> | string
-  name?: Prisma.StringWithAggregatesFilter<"User"> | string
-  gender?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
-  gender_probability?: Prisma.FloatWithAggregatesFilter<"User"> | number
-  country_name?: Prisma.StringWithAggregatesFilter<"User"> | string
-  age?: Prisma.IntNullableWithAggregatesFilter<"User"> | number | null
-  age_group?: Prisma.StringWithAggregatesFilter<"User"> | string
-  country_id?: Prisma.StringWithAggregatesFilter<"User"> | string
-  country_probability?: Prisma.FloatWithAggregatesFilter<"User"> | number
+  github_id?: Prisma.StringWithAggregatesFilter<"User"> | string
+  username?: Prisma.StringWithAggregatesFilter<"User"> | string
+  email?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  avatar_url?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  role?: Prisma.EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
+  is_active?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  last_login_at?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
 
 export type UserCreateInput = {
   id?: string
-  name: string
-  gender?: string | null
-  gender_probability: number
-  country_name: string
-  age?: number | null
-  age_group: string
-  country_id: string
-  country_probability: number
+  github_id: string
+  username: string
+  email?: string | null
+  avatar_url?: string | null
+  role?: $Enums.Role
+  is_active?: boolean
+  last_login_at?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type UserUncheckedCreateInput = {
   id?: string
-  name: string
-  gender?: string | null
-  gender_probability: number
-  country_name: string
-  age?: number | null
-  age_group: string
-  country_id: string
-  country_probability: number
+  github_id: string
+  username: string
+  email?: string | null
+  avatar_url?: string | null
+  role?: $Enums.Role
+  is_active?: boolean
+  last_login_at?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type UserUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gender_probability?: Prisma.FloatFieldUpdateOperationsInput | number
-  country_name?: Prisma.StringFieldUpdateOperationsInput | string
-  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  age_group?: Prisma.StringFieldUpdateOperationsInput | string
-  country_id?: Prisma.StringFieldUpdateOperationsInput | string
-  country_probability?: Prisma.FloatFieldUpdateOperationsInput | number
+  github_id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  last_login_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type UserUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gender_probability?: Prisma.FloatFieldUpdateOperationsInput | number
-  country_name?: Prisma.StringFieldUpdateOperationsInput | string
-  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  age_group?: Prisma.StringFieldUpdateOperationsInput | string
-  country_id?: Prisma.StringFieldUpdateOperationsInput | string
-  country_probability?: Prisma.FloatFieldUpdateOperationsInput | number
+  github_id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  last_login_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type UserCreateManyInput = {
   id?: string
-  name: string
-  gender?: string | null
-  gender_probability: number
-  country_name: string
-  age?: number | null
-  age_group: string
-  country_id: string
-  country_probability: number
+  github_id: string
+  username: string
+  email?: string | null
+  avatar_url?: string | null
+  role?: $Enums.Role
+  is_active?: boolean
+  last_login_at?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type UserUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gender_probability?: Prisma.FloatFieldUpdateOperationsInput | number
-  country_name?: Prisma.StringFieldUpdateOperationsInput | string
-  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  age_group?: Prisma.StringFieldUpdateOperationsInput | string
-  country_id?: Prisma.StringFieldUpdateOperationsInput | string
-  country_probability?: Prisma.FloatFieldUpdateOperationsInput | number
+  github_id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  last_login_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type UserUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gender_probability?: Prisma.FloatFieldUpdateOperationsInput | number
-  country_name?: Prisma.StringFieldUpdateOperationsInput | string
-  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  age_group?: Prisma.StringFieldUpdateOperationsInput | string
-  country_id?: Prisma.StringFieldUpdateOperationsInput | string
-  country_probability?: Prisma.FloatFieldUpdateOperationsInput | number
+  github_id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  last_login_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type UserCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  name?: Prisma.SortOrder
-  gender?: Prisma.SortOrder
-  gender_probability?: Prisma.SortOrder
-  country_name?: Prisma.SortOrder
-  age?: Prisma.SortOrder
-  age_group?: Prisma.SortOrder
-  country_id?: Prisma.SortOrder
-  country_probability?: Prisma.SortOrder
+  github_id?: Prisma.SortOrder
+  username?: Prisma.SortOrder
+  email?: Prisma.SortOrder
+  avatar_url?: Prisma.SortOrder
+  role?: Prisma.SortOrder
+  is_active?: Prisma.SortOrder
+  last_login_at?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
-export type UserAvgOrderByAggregateInput = {
-  gender_probability?: Prisma.SortOrder
-  age?: Prisma.SortOrder
-  country_probability?: Prisma.SortOrder
-}
-
 export type UserMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  name?: Prisma.SortOrder
-  gender?: Prisma.SortOrder
-  gender_probability?: Prisma.SortOrder
-  country_name?: Prisma.SortOrder
-  age?: Prisma.SortOrder
-  age_group?: Prisma.SortOrder
-  country_id?: Prisma.SortOrder
-  country_probability?: Prisma.SortOrder
+  github_id?: Prisma.SortOrder
+  username?: Prisma.SortOrder
+  email?: Prisma.SortOrder
+  avatar_url?: Prisma.SortOrder
+  role?: Prisma.SortOrder
+  is_active?: Prisma.SortOrder
+  last_login_at?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  name?: Prisma.SortOrder
-  gender?: Prisma.SortOrder
-  gender_probability?: Prisma.SortOrder
-  country_name?: Prisma.SortOrder
-  age?: Prisma.SortOrder
-  age_group?: Prisma.SortOrder
-  country_id?: Prisma.SortOrder
-  country_probability?: Prisma.SortOrder
+  github_id?: Prisma.SortOrder
+  username?: Prisma.SortOrder
+  email?: Prisma.SortOrder
+  avatar_url?: Prisma.SortOrder
+  role?: Prisma.SortOrder
+  is_active?: Prisma.SortOrder
+  last_login_at?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
-export type UserSumOrderByAggregateInput = {
-  gender_probability?: Prisma.SortOrder
-  age?: Prisma.SortOrder
-  country_probability?: Prisma.SortOrder
+export type EnumRoleFieldUpdateOperationsInput = {
+  set?: $Enums.Role
 }
 
-export type StringFieldUpdateOperationsInput = {
-  set?: string
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
-export type FloatFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
-export type DateTimeFieldUpdateOperationsInput = {
-  set?: Date | string
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
 }
 
 
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  name?: boolean
-  gender?: boolean
-  gender_probability?: boolean
-  country_name?: boolean
-  age?: boolean
-  age_group?: boolean
-  country_id?: boolean
-  country_probability?: boolean
+  github_id?: boolean
+  username?: boolean
+  email?: boolean
+  avatar_url?: boolean
+  role?: boolean
+  is_active?: boolean
+  last_login_at?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  name?: boolean
-  gender?: boolean
-  gender_probability?: boolean
-  country_name?: boolean
-  age?: boolean
-  age_group?: boolean
-  country_id?: boolean
-  country_probability?: boolean
+  github_id?: boolean
+  username?: boolean
+  email?: boolean
+  avatar_url?: boolean
+  role?: boolean
+  is_active?: boolean
+  last_login_at?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  name?: boolean
-  gender?: boolean
-  gender_probability?: boolean
-  country_name?: boolean
-  age?: boolean
-  age_group?: boolean
-  country_id?: boolean
-  country_probability?: boolean
+  github_id?: boolean
+  username?: boolean
+  email?: boolean
+  avatar_url?: boolean
+  role?: boolean
+  is_active?: boolean
+  last_login_at?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectScalar = {
   id?: boolean
-  name?: boolean
-  gender?: boolean
-  gender_probability?: boolean
-  country_name?: boolean
-  age?: boolean
-  age_group?: boolean
-  country_id?: boolean
-  country_probability?: boolean
+  github_id?: boolean
+  username?: boolean
+  email?: boolean
+  avatar_url?: boolean
+  role?: boolean
+  is_active?: boolean
+  last_login_at?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "gender" | "gender_probability" | "country_name" | "age" | "age_group" | "country_id" | "country_probability" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "github_id" | "username" | "email" | "avatar_url" | "role" | "is_active" | "last_login_at" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
   objects: {}
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    name: string
-    gender: string | null
-    gender_probability: number
-    country_name: string
-    age: number | null
-    age_group: string
-    country_id: string
-    country_probability: number
+    github_id: string
+    username: string
+    email: string | null
+    avatar_url: string | null
+    role: $Enums.Role
+    is_active: boolean
+    last_login_at: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["user"]>
@@ -1020,14 +921,13 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
  */
 export interface UserFieldRefs {
   readonly id: Prisma.FieldRef<"User", 'String'>
-  readonly name: Prisma.FieldRef<"User", 'String'>
-  readonly gender: Prisma.FieldRef<"User", 'String'>
-  readonly gender_probability: Prisma.FieldRef<"User", 'Float'>
-  readonly country_name: Prisma.FieldRef<"User", 'String'>
-  readonly age: Prisma.FieldRef<"User", 'Int'>
-  readonly age_group: Prisma.FieldRef<"User", 'String'>
-  readonly country_id: Prisma.FieldRef<"User", 'String'>
-  readonly country_probability: Prisma.FieldRef<"User", 'Float'>
+  readonly github_id: Prisma.FieldRef<"User", 'String'>
+  readonly username: Prisma.FieldRef<"User", 'String'>
+  readonly email: Prisma.FieldRef<"User", 'String'>
+  readonly avatar_url: Prisma.FieldRef<"User", 'String'>
+  readonly role: Prisma.FieldRef<"User", 'Role'>
+  readonly is_active: Prisma.FieldRef<"User", 'Boolean'>
+  readonly last_login_at: Prisma.FieldRef<"User", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
 }

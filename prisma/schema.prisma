@@ -13,7 +13,7 @@ generator client {
 }
 
 
-model User {
+model Profile {
   id                     String   @id @default(uuid())
   name                   String   @unique
 
@@ -43,4 +43,27 @@ model User {
   @@index([gender, age])
   @@index([country_id, age])
   @@index([gender, country_id])
+}
+
+model User {
+  id             String   @id @default(uuid())
+  github_id      String   @unique
+  username       String
+  email          String?  @unique
+  avatar_url     String?
+
+  role           Role     @default(ANALYST)
+  is_active      Boolean  @default(true)
+
+  last_login_at  DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([github_id])
+  @@index([role])
+}
+
+enum Role {
+  ADMIN
+  ANALYST
 }

@@ -1,12 +1,13 @@
 import { NestFactory } from '@nestjs/core';
-
+import * as passport from 'passport';
 import * as dotenv from 'dotenv';
 import { AppModule } from './app.module';
 dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix('api');
+  //app.use(passport.initialize());
+
   app.enableCors({
     origin: '*',
   });

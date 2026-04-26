@@ -12,7 +12,7 @@ import { QueryDto } from './dto/Query.dto';
 
 import { CreateDto } from './dto/Create.dto';
 
-@Controller()
+@Controller('api')
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
@@ -27,8 +27,8 @@ export class AppController {
   // }
 
   @Get('profiles/search')
-  async searchProfiles(@Query() query: string) {
-    return await this.appService.SearchProfiles(query);
+  async searchProfiles(@Query() q: string) {
+    return await this.appService.SearchProfiles(q);
   }
 
   @Get('profiles')

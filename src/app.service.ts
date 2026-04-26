@@ -47,7 +47,7 @@ export class AppService {
   async resolveCountry(possibleCountry: string) {
     if (!possibleCountry) return null;
 
-    return await this.prisma.user.findFirst({
+    return await this.prisma.profile.findFirst({
       where: {
         country_name: {
           contains: possibleCountry,
@@ -146,7 +146,10 @@ export class AppService {
   }
 
   async GetAllProfiles(query: QueryDto) {
-    const sortMap: Record<string, keyof Prisma.UserOrderByWithRelationInput> = {
+    const sortMap: Record<
+      string,
+      keyof Prisma.ProfileOrderByWithRelationInput
+    > = {
       age: 'age',
       created_at: 'createdAt',
       gender_probability: 'gender_probability',
@@ -169,7 +172,7 @@ export class AppService {
       sort_by,
     } = query;
 
-    const queries: Prisma.UserWhereInput = {
+    const queries: Prisma.ProfileWhereInput = {
       ...(gender && {
         gender: {
           equals: gender,
@@ -262,14 +265,14 @@ export class AppService {
       };
     }
 
-    const data = await this.prisma.user.findMany({
+    const data = await this.prisma.profile.findMany({
       where: queries,
       skip,
       take: limitNumber,
       orderBy,
     });
 
-    const total = await this.prisma.user.count({ where: queries });
+    const total = await this.prisma.profile.count({ where: queries });
 
     return {
       status: 'success',
