@@ -42,6 +42,10 @@ export class AuthService {
     const payload = {
       sub: user.id, //willl be used for refresh token too
       role: user.role,
+      github_id: user.githubId,
+      username: user.username,
+      email: user.email,
+      avatar_url: user.avatar_url,
     };
     const access_token = this.jwtService.sign(payload, {
       expiresIn: '1d',

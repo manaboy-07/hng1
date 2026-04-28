@@ -1,15 +1,23 @@
 import { NestFactory } from '@nestjs/core';
 import * as passport from 'passport';
 import * as dotenv from 'dotenv';
+
+// somewhere in your initialization file
+
 import { AppModule } from './app.module';
+import cookieParser from 'cookie-parser';
+import { ThrottlerExceptionFilter } from './auth/guards/rate-limit.guard';
+import { LoggingInterceptor } from './auth/guards/log.guard';
 dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  //app.use(passport.initialize());
-
+  app.use(cookieParser());
+  app.useGlobalFilters(new ThrottlerExceptionFilter());
+  app.useGlobalInterceptors(new LoggingInterceptor());
   app.enableCors({
-    origin: '*',
+    origin: 'https://insighta-dun.vercel.app/',
+    credentials: true,
   });
 
   const port = process.env.PORT || 3000;
