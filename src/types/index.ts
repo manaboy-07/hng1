@@ -29,7 +29,7 @@ export interface ModifiedResponse {
     name: string;
     gender: string | null;
     gender_probability: number;
-    country_name: number;
+    country_name: any;
     age: number | null;
     age_group: string;
     country_id: string;

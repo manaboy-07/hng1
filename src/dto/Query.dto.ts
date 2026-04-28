@@ -50,6 +50,10 @@ export class QueryDto {
   order?: string;
 
   @IsOptional()
+  @IsString()
+  format?: string;
+
+  @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)

@@ -32,6 +32,7 @@ export type UserMinAggregateOutputType = {
   avatar_url: string | null
   role: $Enums.Role | null
   is_active: boolean | null
+  refresh_token: string | null
   last_login_at: Date | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -45,6 +46,7 @@ export type UserMaxAggregateOutputType = {
   avatar_url: string | null
   role: $Enums.Role | null
   is_active: boolean | null
+  refresh_token: string | null
   last_login_at: Date | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -58,6 +60,7 @@ export type UserCountAggregateOutputType = {
   avatar_url: number
   role: number
   is_active: number
+  refresh_token: number
   last_login_at: number
   createdAt: number
   updatedAt: number
@@ -73,6 +76,7 @@ export type UserMinAggregateInputType = {
   avatar_url?: true
   role?: true
   is_active?: true
+  refresh_token?: true
   last_login_at?: true
   createdAt?: true
   updatedAt?: true
@@ -86,6 +90,7 @@ export type UserMaxAggregateInputType = {
   avatar_url?: true
   role?: true
   is_active?: true
+  refresh_token?: true
   last_login_at?: true
   createdAt?: true
   updatedAt?: true
@@ -99,6 +104,7 @@ export type UserCountAggregateInputType = {
   avatar_url?: true
   role?: true
   is_active?: true
+  refresh_token?: true
   last_login_at?: true
   createdAt?: true
   updatedAt?: true
@@ -185,6 +191,7 @@ export type UserGroupByOutputType = {
   avatar_url: string | null
   role: $Enums.Role
   is_active: boolean
+  refresh_token: string | null
   last_login_at: Date | null
   createdAt: Date
   updatedAt: Date
@@ -219,6 +226,7 @@ export type UserWhereInput = {
   avatar_url?: Prisma.StringNullableFilter<"User"> | string | null
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   is_active?: Prisma.BoolFilter<"User"> | boolean
+  refresh_token?: Prisma.StringNullableFilter<"User"> | string | null
   last_login_at?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -232,6 +240,7 @@ export type UserOrderByWithRelationInput = {
   avatar_url?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
   is_active?: Prisma.SortOrder
+  refresh_token?: Prisma.SortOrderInput | Prisma.SortOrder
   last_login_at?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -248,6 +257,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   avatar_url?: Prisma.StringNullableFilter<"User"> | string | null
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   is_active?: Prisma.BoolFilter<"User"> | boolean
+  refresh_token?: Prisma.StringNullableFilter<"User"> | string | null
   last_login_at?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -261,6 +271,7 @@ export type UserOrderByWithAggregationInput = {
   avatar_url?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
   is_active?: Prisma.SortOrder
+  refresh_token?: Prisma.SortOrderInput | Prisma.SortOrder
   last_login_at?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -280,6 +291,7 @@ export type UserScalarWhereWithAggregatesInput = {
   avatar_url?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   role?: Prisma.EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
   is_active?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  refresh_token?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   last_login_at?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -293,6 +305,7 @@ export type UserCreateInput = {
   avatar_url?: string | null
   role?: $Enums.Role
   is_active?: boolean
+  refresh_token?: string | null
   last_login_at?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -306,6 +319,7 @@ export type UserUncheckedCreateInput = {
   avatar_url?: string | null
   role?: $Enums.Role
   is_active?: boolean
+  refresh_token?: string | null
   last_login_at?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -319,6 +333,7 @@ export type UserUpdateInput = {
   avatar_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  refresh_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   last_login_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -332,6 +347,7 @@ export type UserUncheckedUpdateInput = {
   avatar_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  refresh_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   last_login_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -345,6 +361,7 @@ export type UserCreateManyInput = {
   avatar_url?: string | null
   role?: $Enums.Role
   is_active?: boolean
+  refresh_token?: string | null
   last_login_at?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -358,6 +375,7 @@ export type UserUpdateManyMutationInput = {
   avatar_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  refresh_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   last_login_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -371,6 +389,7 @@ export type UserUncheckedUpdateManyInput = {
   avatar_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  refresh_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   last_login_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -384,6 +403,7 @@ export type UserCountOrderByAggregateInput = {
   avatar_url?: Prisma.SortOrder
   role?: Prisma.SortOrder
   is_active?: Prisma.SortOrder
+  refresh_token?: Prisma.SortOrder
   last_login_at?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -397,6 +417,7 @@ export type UserMaxOrderByAggregateInput = {
   avatar_url?: Prisma.SortOrder
   role?: Prisma.SortOrder
   is_active?: Prisma.SortOrder
+  refresh_token?: Prisma.SortOrder
   last_login_at?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -410,6 +431,7 @@ export type UserMinOrderByAggregateInput = {
   avatar_url?: Prisma.SortOrder
   role?: Prisma.SortOrder
   is_active?: Prisma.SortOrder
+  refresh_token?: Prisma.SortOrder
   last_login_at?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -437,6 +459,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   avatar_url?: boolean
   role?: boolean
   is_active?: boolean
+  refresh_token?: boolean
   last_login_at?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -450,6 +473,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   avatar_url?: boolean
   role?: boolean
   is_active?: boolean
+  refresh_token?: boolean
   last_login_at?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -463,6 +487,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   avatar_url?: boolean
   role?: boolean
   is_active?: boolean
+  refresh_token?: boolean
   last_login_at?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -476,12 +501,13 @@ export type UserSelectScalar = {
   avatar_url?: boolean
   role?: boolean
   is_active?: boolean
+  refresh_token?: boolean
   last_login_at?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "github_id" | "username" | "email" | "avatar_url" | "role" | "is_active" | "last_login_at" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "github_id" | "username" | "email" | "avatar_url" | "role" | "is_active" | "refresh_token" | "last_login_at" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
@@ -494,6 +520,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     avatar_url: string | null
     role: $Enums.Role
     is_active: boolean
+    refresh_token: string | null
     last_login_at: Date | null
     createdAt: Date
     updatedAt: Date
@@ -927,6 +954,7 @@ export interface UserFieldRefs {
   readonly avatar_url: Prisma.FieldRef<"User", 'String'>
   readonly role: Prisma.FieldRef<"User", 'Role'>
   readonly is_active: Prisma.FieldRef<"User", 'Boolean'>
+  readonly refresh_token: Prisma.FieldRef<"User", 'String'>
   readonly last_login_at: Prisma.FieldRef<"User", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>

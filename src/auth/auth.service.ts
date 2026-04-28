@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -12,6 +12,7 @@ export class AuthService {
   ) {}
 
   async valaidateOauthUSer(profile: any) {
+    //find user in db with githubid else create user to the db
     let user = await this.prismaService.user.findUnique({
       where: { github_id: profile.githubId },
     });
@@ -25,18 +26,70 @@ export class AuthService {
         },
       });
     }
-    //generate token for the user
-    return this.generateToken(user);
+    //generate token for the user hence authenticate them. This is where jwtauthguard comes usefeul
+    const tokens = this.generateToken(user);
+    //store user refresh token
+    await this.prismaService.user.update({
+      where: { id: user.id },
+      data: {
+        refresh_token: tokens.refresh_token,
+      },
+    });
+    return tokens;
   }
 
   generateToken(user: any) {
-    const access_token = this.jwtService.sign({
-      sub: user.id,
+    const payload = {
+      sub: user.id, //willl be used for refresh token too
       role: user.role,
+    };
+    const access_token = this.jwtService.sign(payload, {
+      expiresIn: '1d',
+    });
+    const refresh_token = this.jwtService.sign(payload, {
+      expiresIn: '1d',
     });
 
     return {
       access_token,
+      refresh_token,
+    };
+  }
+
+  async validateAndUpdateRefreshToken(refresh_token: string) {
+    const payload = this.jwtService.verify(refresh_token);
+    //refresh token is already stored in the db
+    const user = await this.prismaService.user.findUnique({
+      where: { id: payload.sub },
+    });
+    //check if user exists or if refresh token matches
+    if (!user || user.refresh_token !== refresh_token) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+    //rotate tokens
+    const tokens = this.generateToken(user);
+    await this.prismaService.user.update({
+      where: { id: user.id },
+      data: {
+        refresh_token: tokens.refresh_token,
+      },
+    });
+    return {
+      status: 'success',
+      ...tokens,
+    };
+  }
+
+  async logOut(refresh_token: string) {
+    const payload = this.jwtService.verify(refresh_token);
+    await this.prismaService.user.update({
+      where: { id: payload.sub },
+      data: {
+        refresh_token: null,
+      },
+    });
+    return {
+      status: 'success',
     };
   }
 }

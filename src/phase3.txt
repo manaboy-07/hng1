@@ -1,0 +1,415 @@
+CLI respo
+
+This is where your project becomes **🔥 real product-level engineering**.
+You’re basically building your own version of something like a dev tool CLI.
+
+Let’s break Phase 3 into a **clear, buildable system** so you don’t get overwhelmed.
+
+---
+
+# 🧠 Big Picture — What you’re building
+
+You’re creating a CLI tool called:
+
+```bash
+insighta
+```
+
+That:
+
+* Talks to your **NestJS API**
+* Manages **auth (tokens + refresh)**
+* Stores credentials locally
+* Displays data nicely
+
+---
+
+# 🧱 ARCHITECTURE (very important)
+
+Your CLI will have:
+
+```txt
+CLI (Node.js)
+   ↓
+HTTP Client (axios/fetch)
+   ↓
+Your API (NestJS)
+```
+
+---
+
+# 🔧 STEP 1 — Create the CLI Project
+
+```bash
+mkdir insighta-cli
+cd insighta-cli
+npm init -y
+npm install commander axios ora cli-table3 fs-extra
+npm install -D typescript ts-node @types/node
+```
+
+---
+
+# 🧠 Key libraries
+
+| Library      | Purpose         |
+| ------------ | --------------- |
+| `commander`  | CLI commands    |
+| `axios`      | API requests    |
+| `ora`        | loading spinner |
+| `cli-table3` | pretty tables   |
+| `fs-extra`   | file handling   |
+
+---
+
+# 🔧 STEP 2 — Make CLI globally installable
+
+In `package.json`:
+
+```json
+{
+  "name": "insighta",
+  "bin": {
+    "insighta": "./dist/index.js"
+  }
+}
+```
+
+Then:
+
+```bash
+npm link
+```
+
+Now this works globally:
+
+```bash
+insighta login
+```
+
+---
+
+# 🔐 STEP 3 — Credentials Storage
+
+Path:
+
+```txt
+~/.insighta/credentials.json
+```
+
+---
+
+## Utility file
+
+```ts
+import * as fs from 'fs-extra';
+import * as path from 'path';
+import * as os from 'os';
+
+const dir = path.join(os.homedir(), '.insighta');
+const file = path.join(dir, 'credentials.json');
+
+export async function saveCredentials(data) {
+  await fs.ensureDir(dir);
+  await fs.writeJson(file, data);
+}
+
+export async function getCredentials() {
+  if (!(await fs.pathExists(file))) return null;
+  return fs.readJson(file);
+}
+
+export async function clearCredentials() {
+  await fs.remove(file);
+}
+```
+
+---
+
+# 🔑 STEP 4 — Auth Commands
+
+---
+
+## 🔹 login
+
+Flow:
+
+```bash
+insighta login
+```
+
+### How it works
+
+Since you use GitHub OAuth:
+
+👉 Open browser
+
+```ts
+import open from 'open';
+
+await open('http://localhost:3000/api/auth/github');
+```
+
+---
+
+### Problem:
+
+How does CLI get tokens?
+
+---
+
+## ✅ Solution (important)
+
+Modify backend callback:
+
+Instead of returning JSON → redirect:
+
+```ts
+res.redirect(`http://localhost:3000/cli?token=...`);
+```
+
+OR simpler for now:
+
+👉 After login, manually paste token into CLI (acceptable for now)
+
+---
+
+## 🔹 logout
+
+```ts
+await axios.post('/auth/logout', { refresh_token });
+clearCredentials();
+```
+
+---
+
+## 🔹 whoami
+
+```ts
+GET /profile/me
+```
+
+Display user info
+
+---
+
+# 🔁 STEP 5 — Token Auto Refresh (IMPORTANT)
+
+Create request wrapper:
+
+```ts
+async function apiRequest(config) {
+  let creds = await getCredentials();
+
+  try {
+    return await axios({
+      ...config,
+      headers: {
+        Authorization: `Bearer ${creds.access_token}`,
+        'X-API-Version': '1',
+      },
+    });
+  } catch (err) {
+    if (err.response?.status === 401) {
+      // 🔥 refresh token
+      const res = await axios.post('/auth/refresh', {
+        refresh_token: creds.refresh_token,
+      });
+
+      await saveCredentials(res.data);
+
+      // retry original request
+      return axios({
+        ...config,
+        headers: {
+          Authorization: `Bearer ${res.data.access_token}`,
+        },
+      });
+    }
+
+    throw err;
+  }
+}
+```
+
+---
+
+# 📊 STEP 6 — Profiles Commands
+
+---
+
+## 🔹 list
+
+```bash
+insighta profiles list --gender male --page 2
+```
+
+Use `commander`:
+
+```ts
+program
+  .command('profiles:list')
+  .option('--gender <gender>')
+  .option('--page <page>')
+  .action(async (options) => {
+    const res = await apiRequest({
+      url: '/profiles',
+      params: options,
+    });
+
+    displayTable(res.data.data);
+  });
+```
+
+---
+
+# 📋 STEP 7 — Table Output
+
+```ts
+import Table from 'cli-table3';
+
+function displayTable(data) {
+  const table = new Table({
+    head: ['ID', 'Name', 'Gender', 'Age'],
+  });
+
+  data.forEach((row) => {
+    table.push([row.id, row.name, row.gender, row.age]);
+  });
+
+  console.log(table.toString());
+}
+```
+
+---
+
+# ⏳ STEP 8 — Loader
+
+```ts
+import ora from 'ora';
+
+const spinner = ora('Fetching profiles...').start();
+
+try {
+  const res = await apiRequest(...);
+  spinner.succeed('Done');
+} catch (err) {
+  spinner.fail('Failed');
+}
+```
+
+---
+
+# 🔍 STEP 9 — Search
+
+```bash
+insighta profiles search "young males from nigeria"
+```
+
+```ts
+axios.get('/profiles/search', {
+  params: { q: query },
+});
+```
+
+---
+
+# 🆕 STEP 10 — Create (Admin only)
+
+```bash
+insighta profiles create --name "Harriet Tubman"
+```
+
+---
+
+# 📁 STEP 11 — Export CSV
+
+```bash
+insighta profiles export --format csv
+```
+
+Save file:
+
+```ts
+import * as fs from 'fs';
+
+fs.writeFileSync(
+  `profiles_${Date.now()}.csv`,
+  response.data
+);
+```
+
+---
+
+# 🧠 CLI Behavior Requirements (you must satisfy)
+
+### ✅ Auth
+
+* stores tokens
+* auto refresh
+* logout clears file
+
+---
+
+### ✅ UX
+
+* spinner (ora)
+* tables (cli-table3)
+* clear errors
+
+---
+
+### ✅ Storage
+
+```txt
+~/.insighta/credentials.json
+```
+
+---
+
+### ✅ Export
+
+* saved in current directory
+
+---
+
+# 🔥 Final mental model
+
+```txt
+CLI = frontend without UI
+```
+
+Everything you built in backend:
+
+👉 you are now consuming it like a real client
+
+---
+
+# 🚀 What makes this impressive
+
+If you finish this:
+
+* You built OAuth system
+* You built token lifecycle
+* You built CLI client
+* You handled real-world auth flow
+
+👉 This is **intern → junior engineer level jump**
+
+---
+
+# 👇 Next step
+
+Tell me:
+
+### A. “Scaffold CLI structure for me”
+
+👉 I’ll give you folder structure + starter code
+
+### B. “Let’s implement login flow properly (no manual copy)”
+
+👉 advanced OAuth CLI flow (PKCE level)
+
+### C. “Let’s build commands one by one”
+
+Pick one 👍

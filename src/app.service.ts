@@ -43,7 +43,14 @@ export class AppService {
     }
     return bestCountry;
   }
+  async getCountryName(countryId: string) {
+    const res = await fetch(
+      `https://restcountries.com/v3.1/alpha/${countryId}`,
+    );
+    const data = await res.json();
 
+    return data?.[0]?.name?.common || null;
+  }
   async resolveCountry(possibleCountry: string) {
     if (!possibleCountry) return null;
 
@@ -60,80 +67,82 @@ export class AppService {
     });
   }
 
-  // async getReponses(name: string) {
-  //   const genderizeAPI = await fetch(`https://api.genderize.io/?name=${name}`);
-  //   const AgifyAPI = await fetch(` https://api.agify.io?name=${name}`);
-  //   const NationalizeAPI = await fetch(
-  //     `https://api.nationalize.io?name=${name}`,
-  //   );
+  async getReponses(name: string) {
+    const genderizeAPI = await fetch(`https://api.genderize.io/?name=${name}`);
+    const AgifyAPI = await fetch(` https://api.agify.io?name=${name}`);
+    const NationalizeAPI = await fetch(
+      `https://api.nationalize.io?name=${name}`,
+    );
 
-  //   const genderizeAPIResponse: GenderResponse = await genderizeAPI.json();
-  //   const AgifyAPIResponse: AgeResponse = await AgifyAPI.json();
-  //   const NationalizeAPIResponse: NationalityResponse =
-  //     await NationalizeAPI.json();
+    const genderizeAPIResponse: GenderResponse = await genderizeAPI.json();
+    const AgifyAPIResponse: AgeResponse = await AgifyAPI.json();
+    const NationalizeAPIResponse: NationalityResponse =
+      await NationalizeAPI.json();
 
-  //   const { gender, probability, count: sample_size } = genderizeAPIResponse;
+    const { gender, probability, count: sample_size } = genderizeAPIResponse;
 
-  //   const age = AgifyAPIResponse.age;
-  //   const age_group = this.getAgeGroup(age);
-  //   const Nationality: CountryProbability | null = this.getNationalilty(
-  //     NationalizeAPIResponse?.country,
-  //   );
-  //   const modifiedResponse: ModifiedResponse = {
-  //     data: {
-  //       name,
-  //       gender,
-  //       gender_probability: probability,
-  //       sample_size,
-  //       age,
-  //       age_group,
-  //       country_id: Nationality.country_id,
-  //       country_probability: Number(Nationality?.probability.toFixed(2)),
-  //     },
-  //   };
-  //   if (
-  //     gender === null ||
-  //     sample_size === 0 ||
-  //     age === null ||
-  //     NationalizeAPIResponse.country.length === 0
-  //   ) {
-  //     throw new BadGatewayException({
-  //       status: 'error',
-  //       message: 'External Api returned invalid response',
-  //     });
-  //   }
+    const age = AgifyAPIResponse.age;
+    const age_group = this.getAgeGroup(age);
+    const Nationality: CountryProbability | null = this.getNationalilty(
+      NationalizeAPIResponse?.country,
+    );
+    const country_name = this.getCountryName(Nationality.country_id);
+    console.log(Nationality);
+    const modifiedResponse: ModifiedResponse = {
+      data: {
+        name,
+        gender,
+        gender_probability: probability,
+        age,
+        age_group,
+        country_name,
+        country_id: Nationality.country_id,
+        country_probability: Number(Nationality?.probability.toFixed(2)),
+      },
+    };
+    if (
+      gender === null ||
+      sample_size === 0 ||
+      age === null ||
+      NationalizeAPIResponse.country.length === 0
+    ) {
+      throw new BadGatewayException({
+        status: 'error',
+        message: 'External Api returned invalid response',
+      });
+    }
 
-  //   return modifiedResponse;
-  // }
+    return modifiedResponse;
+  }
 
-  // async createProfile(createDto: CreateDto) {
-  //   const name = createDto.name;
+  async createProfile(createDto: CreateDto) {
+    const name = createDto.name;
 
-  //   const nameExist = await this.prisma.user.findUnique({
-  //     where: { name },
-  //   });
-  //   if (nameExist) {
-  //     return {
-  //       staus: 'success',
-  //       message: 'Profile already exists',
-  //       data: nameExist,
-  //     };
-  //   }
+    const nameExist = await this.prisma.profile.findUnique({
+      where: { name },
+    });
+    if (nameExist) {
+      return {
+        staus: 'success',
+        message: 'Profile already exists',
+        data: nameExist,
+      };
+    }
 
-  //   const resolvedResponse = await this.getReponses(name);
+    const resolvedResponse = await this.getReponses(name);
 
-  //   const createuser = await this.prisma.user.create({
-  //     data: resolvedResponse.data,
-  //   });
+    const createuser = await this.prisma.profile.create({
+      data: resolvedResponse.data,
+    });
 
-  //   return {
-  //     status: 'success',
-  //     data: createuser,
-  //   };
-  // }
+    return {
+      status: 'success',
+      data: createuser,
+    };
+  }
 
   async GetProfileByID(id: string) {
-    const userExist = await this.prisma.user.findUnique({
+    const userExist = await this.prisma.profile.findUnique({
       where: { id },
     });
     if (!userExist) {
@@ -273,12 +282,22 @@ export class AppService {
     });
 
     const total = await this.prisma.profile.count({ where: queries });
+    const total_pages = Math.ceil(total / limitNumber);
+    const baseUrl = '/api/profiles';
+    const buildLink = (page: number | null) =>
+      page ? `${baseUrl}?page=${page}&limit=${limitNumber}` : null;
 
     return {
       status: 'success',
       page: pageNumber,
       limit: limitNumber,
       total,
+      total_pages,
+      links: {
+        self: buildLink(pageNumber),
+        next: pageNumber < total_pages ? buildLink(pageNumber + 1) : null,
+        prev: pageNumber > 1 ? buildLink(pageNumber - 1) : null,
+      },
       data,
     };
   }
@@ -352,34 +371,44 @@ export class AppService {
     const limit = Math.min(50, Math.max(1, Number(searchQuery.limit) || 10));
     const skip = (page - 1) * limit;
 
-    const data = await this.prisma.user.findMany({
+    const data = await this.prisma.profile.findMany({
       where,
       skip,
       take: limit,
     });
 
-    const total = await this.prisma.user.count({ where });
+    const total = await this.prisma.profile.count({ where });
+    const total_pages = Math.ceil(total / limit);
+    const baseUrl = '/api/profiles/search';
+    const buildLink = (page: number | null) =>
+      page ? `${baseUrl}?page=${page}&limit=${limit}` : null;
 
     return {
       status: 'success',
       page,
       limit,
       total,
+      total_pages,
+      links: {
+        self: buildLink(page),
+        next: page < total_pages ? buildLink(page + 1) : null,
+        prev: page > 1 ? buildLink(page - 1) : null,
+      },
       data,
     };
   }
 
   async deleteProfile(id: string) {
-    const userExist = await this.prisma.user.findUnique({
+    const profileExist = await this.prisma.profile.findUnique({
       where: { id },
     });
-    if (!userExist) {
+    if (!profileExist) {
       throw new NotFoundException({
         status: 'error',
         message: 'Profile not fount',
       });
     }
-    await this.prisma.user.delete({
+    await this.prisma.profile.delete({
       where: { id },
     });
   }

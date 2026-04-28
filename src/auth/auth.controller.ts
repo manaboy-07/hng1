@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   HttpCode,
@@ -13,6 +14,7 @@ import { AuthService } from './auth.service';
 
 import { GithubAuthGuard } from './guards/github.guard';
 import { Public } from './decorators/public.decorator';
+import { JWTAuthGuard } from './guards/jwt.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -30,6 +32,20 @@ export class AuthController {
   @UseGuards(GithubAuthGuard)
   async githubCallback(@Req() req) {
     //lobin user and return accesstoken
-    return this.authService.valaidateOauthUSer(req.user);
+    return await this.authService.valaidateOauthUSer(req.user);
+  }
+
+  @Public()
+  @Post('refresh')
+  async refresh(@Body() body: { refresh_token: string }) {
+    return await this.authService.validateAndUpdateRefreshToken(
+      body.refresh_token,
+    );
+  }
+
+  @Public()
+  @Post('logout')
+  async logOut(@Body() body: { refresh_token: string }) {
+    return await this.authService.logOut(body.refresh_token);
   }
 }

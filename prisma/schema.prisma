@@ -54,7 +54,7 @@ model User {
 
   role           Role     @default(ANALYST)
   is_active      Boolean  @default(true)
-
+  refresh_token  String?
   last_login_at  DateTime?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
