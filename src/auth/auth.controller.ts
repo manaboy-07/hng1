@@ -31,42 +31,39 @@ export class AuthController {
   @Get('github/callback')
   @UseGuards(GithubAuthGuard)
   async githubCallback(@Req() req: any, @Res() res: Response) {
-    const { code, state } = req.query;
+    try {
+      if (!req.user) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'OAuth failed - no user returned',
+        });
+      }
 
-    if (!code) {
-      throw new BadRequestException('Missing code');
-    }
-    if (
-      req.query.code_challenge &&
-      req.query.code_challenge_method !== 'S256'
-    ) {
-      throw new BadRequestException('Invalid PKCE method');
-    }
-    if (!state) {
-      throw new BadRequestException('Missing state');
-    }
+      const tokens = await this.authService.valaidateOauthUSer(req.user);
 
-    if (!req.user) {
-      throw new UnauthorizedException('Invalid OAuth user');
-    }
+      const isProd = process.env.NODE_ENV === 'production';
 
-    const tokens = await this.authService.valaidateOauthUSer(req.user);
+      res.cookie('access_token', tokens.access_token, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? 'none' : 'lax',
+      });
 
-    if (state === 'test' || state === 'api') {
-      return res.json({
-        status: 'success',
-        access_token: tokens.access_token,
-        refresh_token: tokens.refresh_token,
+      res.cookie('refresh_token', tokens.refresh_token, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? 'none' : 'lax',
+      });
+
+      return res.redirect(process.env.FRONTEND_URL!);
+    } catch (err) {
+      console.error(err);
+
+      return res.status(500).json({
+        status: 'error',
+        message: 'OAuth callback failed',
       });
     }
-
-    if (state === 'cli') {
-      return res.redirect(
-        `http://localhost:4242/callback?access_token=${tokens.access_token}&refresh_token=${tokens.refresh_token}`,
-      );
-    }
-
-    return res.redirect(`${process.env.FRONTEND_URL!}`);
   }
 
   @Public()
