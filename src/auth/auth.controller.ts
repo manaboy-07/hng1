@@ -33,31 +33,44 @@ export class AuthController {
   @Public()
   @Get('github/callback')
   @UseGuards(GithubAuthGuard)
-  async githubCallback(@Req() req: Request, @Res() res: Response) {
-    const tokens = await this.authService.valaidateOauthUSer(req.user);
+  async githubCallback(@Req() req: any, @Res() res: Response) {
+    try {
+      console.log('🔵 GitHub callback hit');
+      console.log('USER:', req.user);
 
-    const isProd = process.env.NODE_ENV === 'production';
+      if (!req.user) {
+        return res.status(401).send('OAuth failed: no user returned');
+      }
 
-    // 🔐 ACCESS TOKEN COOKIE
-    res.cookie('access_token', tokens.access_token, {
-      httpOnly: true,
-      secure: isProd, // MUST be true in production
-      sameSite: isProd ? 'none' : 'lax',
-      maxAge: 15 * 60 * 1000,
-    });
+      const tokens = await this.authService.valaidateOauthUSer(req.user);
 
-    // 🔐 REFRESH TOKEN COOKIE
-    res.cookie('refresh_token', tokens.refresh_token, {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? 'none' : 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+      if (!tokens) {
+        return res.status(500).send('Token generation failed');
+      }
 
-    // ✅ REDIRECT TO FRONTEND
-    return res.redirect(
-      process.env.FRONTEND_URL || 'http://localhost:3000/dashboard',
-    );
+      const isProd = process.env.NODE_ENV! === 'production';
+
+      res.cookie('access_token', tokens.access_token, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? 'none' : 'lax',
+      });
+
+      res.cookie('refresh_token', tokens.refresh_token, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? 'none' : 'lax',
+      });
+
+      console.log(' Redirecting to frontend');
+
+      return res.redirect(
+        process.env.FRONTEND_URL! || 'http://localhost:3001/dashboard',
+      );
+    } catch (err) {
+      console.error('❌ OAuth callback error:', err);
+      return res.status(500).send('OAuth callback failed');
+    }
   }
 
   @Public()

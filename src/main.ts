@@ -14,7 +14,7 @@ async function bootstrap() {
   app.useGlobalFilters(new ThrottlerExceptionFilter());
   app.useGlobalInterceptors(new LoggingInterceptor());
   app.enableCors({
-    origin: ['http://localhost:3000', 'https://insighta-dun.vercel.app'],
+    origin: ['http://localhost:3001', 'https://insighta-dun.vercel.app'],
     credentials: true,
   });
 
