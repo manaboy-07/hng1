@@ -64,11 +64,15 @@ export class AuthController {
         sameSite: isProd ? 'none' : 'lax',
       });
 
-      console.log(' Redirecting to frontend');
+      const isCLI = req.query.state === 'cli';
 
-      return res.redirect(
-        process.env.FRONTEND_URL! || 'http://localhost:3001/dashboard',
-      );
+      if (isCLI) {
+        return res.redirect(
+          `http://localhost:4242/callback?access_token=${tokens.access_token}&refresh_token=${tokens.refresh_token}`,
+        );
+      }
+
+      return res.redirect(`${process.env.FRONTEND_URL!}/dashboard`);
     } catch (err) {
       console.error('❌ OAuth callback error:', err);
       return res.status(500).send('OAuth callback failed');
