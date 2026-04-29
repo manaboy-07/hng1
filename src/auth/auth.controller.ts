@@ -21,17 +21,11 @@ dotenv.config();
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // =========================
-  // GITHUB OAUTH START
-  // =========================
   @Public()
   @Get('github')
   @UseGuards(GithubAuthGuard)
   async github() {}
 
-  // =========================
-  // GITHUB CALLBACK (MAIN FIX)
-  // =========================
   @Public()
   @Get('github/callback')
   @UseGuards(GithubAuthGuard)
@@ -74,7 +68,7 @@ export class AuthController {
 
       return res.redirect(`${process.env.FRONTEND_URL!}/dashboard`);
     } catch (err) {
-      console.error('❌ OAuth callback error:', err);
+      console.error('OAuth callback error:', err);
       return res.status(500).send('OAuth callback failed');
     }
   }
