@@ -13,6 +13,8 @@ import { GithubAuthGuard } from './guards/github.guard';
 import { JWTAuthGuard } from './guards/jwt.guard';
 import { Public } from './decorators/public.decorator';
 import { Throttle } from '@nestjs/throttler';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 @Controller('auth')
 @Throttle({ default: { limit: 10, ttl: 60 } })
