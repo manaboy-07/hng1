@@ -12,6 +12,7 @@ export class ApiVersionGuard implements CanActivate {
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
     const version = request.headers['x-api-version'];
+
     if (!version) {
       throw new BadRequestException({
         staus: 'error',
