@@ -48,10 +48,10 @@ export class AuthService {
       avatar_url: user.avatar_url,
     };
     const access_token = this.jwtService.sign(payload, {
-      expiresIn: '1d',
+      expiresIn: '3m',
     });
     const refresh_token = this.jwtService.sign(payload, {
-      expiresIn: '1d',
+      expiresIn: '5m',
     });
 
     return {

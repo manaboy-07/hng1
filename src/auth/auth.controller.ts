@@ -1,10 +1,12 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
   Post,
   Req,
   Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import type { Response, Request } from 'express';
@@ -15,62 +17,51 @@ import { Public } from './decorators/public.decorator';
 import { Throttle } from '@nestjs/throttler';
 import * as dotenv from 'dotenv';
 dotenv.config();
-
-@Controller('auth')
 @Throttle({ default: { limit: 10, ttl: 60 } })
+@Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
   @Get('github')
   @UseGuards(GithubAuthGuard)
-  async github() {}
+  github() {}
 
   @Public()
   @Get('github/callback')
   @UseGuards(GithubAuthGuard)
   async githubCallback(@Req() req: any, @Res() res: Response) {
-    try {
-      console.log('🔵 GitHub callback hit');
-      console.log('USER:', req.user);
+    const { code, state } = req.query;
 
-      if (!req.user) {
-        return res.status(401).send('OAuth failed: no user returned');
-      }
-
-      const tokens = await this.authService.valaidateOauthUSer(req.user);
-
-      if (!tokens) {
-        return res.status(500).send('Token generation failed');
-      }
-
-      const isProd = process.env.NODE_ENV! === 'production';
-
-      res.cookie('access_token', tokens.access_token, {
-        httpOnly: true,
-        secure: isProd,
-        sameSite: isProd ? 'none' : 'lax',
-      });
-
-      res.cookie('refresh_token', tokens.refresh_token, {
-        httpOnly: true,
-        secure: isProd,
-        sameSite: isProd ? 'none' : 'lax',
-      });
-
-      const isCLI = req.query.state === 'cli';
-
-      if (isCLI) {
-        return res.redirect(
-          `http://localhost:4242/callback?access_token=${tokens.access_token}&refresh_token=${tokens.refresh_token}`,
-        );
-      }
-
-      return res.redirect(`${process.env.FRONTEND_URL!}`);
-    } catch (err) {
-      console.error('OAuth callback error:', err);
-      return res.status(500).send('OAuth callback failed');
+    if (!code) {
+      throw new BadRequestException('Missing code');
     }
+
+    if (!state) {
+      throw new BadRequestException('Missing state');
+    }
+
+    if (!req.user) {
+      throw new UnauthorizedException('Invalid OAuth user');
+    }
+
+    const tokens = await this.authService.valaidateOauthUSer(req.user);
+
+    if (state === 'test' || state === 'api') {
+      return res.json({
+        status: 'success',
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
+      });
+    }
+
+    if (state === 'cli') {
+      return res.redirect(
+        `http://localhost:4242/callback?access_token=${tokens.access_token}&refresh_token=${tokens.refresh_token}`,
+      );
+    }
+
+    return res.redirect(`${process.env.FRONTEND_URL!}`);
   }
 
   @Public()
@@ -78,35 +69,39 @@ export class AuthController {
   async refresh(@Req() req: Request, @Res() res: Response) {
     const refreshToken = req.cookies?.refresh_token;
 
+    if (!refreshToken) {
+      throw new BadRequestException('No refresh token');
+    }
+
     const tokens =
       await this.authService.validateAndUpdateRefreshToken(refreshToken);
 
-    const isProd = process.env.NODE_ENV === 'production';
-
-    res.cookie('access_token', tokens.access_token, {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? 'none' : 'lax',
-      maxAge: 15 * 60 * 1000,
+    return res.json({
+      status: 'success',
+      access_token: tokens.access_token,
+      refresh_token: tokens.refresh_token,
     });
-
-    return res.json(tokens);
   }
 
   @Public()
   @Post('logout')
-  async logOut(@Body() body: { refresh_token: string }, @Res() res: Response) {
-    res.clearCookie('access_token');
-    res.clearCookie('refresh_token');
+  async logout(@Req() req: Request) {
+    const refreshToken = req.cookies?.refresh_token;
 
-    await this.authService.logOut(body.refresh_token);
+    if (!refreshToken) {
+      throw new BadRequestException('No refresh token');
+    }
 
-    return res.json({ message: 'Logged out' });
+    await this.authService.logOut(refreshToken);
+
+    return {
+      status: 'success',
+      message: 'Logged out',
+    };
   }
-
   @UseGuards(JWTAuthGuard)
   @Get('me')
-  async me(@Req() req: Request) {
+  me(@Req() req) {
     return {
       user: req.user,
     };
