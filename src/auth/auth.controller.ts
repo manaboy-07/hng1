@@ -36,7 +36,12 @@ export class AuthController {
     if (!code) {
       throw new BadRequestException('Missing code');
     }
-
+    if (
+      req.query.code_challenge &&
+      req.query.code_challenge_method !== 'S256'
+    ) {
+      throw new BadRequestException('Invalid PKCE method');
+    }
     if (!state) {
       throw new BadRequestException('Missing state');
     }
