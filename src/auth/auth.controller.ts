@@ -66,7 +66,7 @@ export class AuthController {
         );
       }
 
-      return res.redirect(`${process.env.FRONTEND_URL!}/dashboard`);
+      return res.redirect(`${process.env.FRONTEND_URL!}`);
     } catch (err) {
       console.error('OAuth callback error:', err);
       return res.status(500).send('OAuth callback failed');
