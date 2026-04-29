@@ -92,5 +92,8 @@
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
+  },
+  "compilerOptions": {
+    "skipLibCheck": true
   }
 }
