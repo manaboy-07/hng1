@@ -1,6 +1,12 @@
-// guards/github-auth.guard.ts
-import { Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { ExecutionContext } from '@nestjs/common';
 
-@Injectable()
-export class GithubAuthGuard extends AuthGuard('github') {}
+export class GithubAuthGuard extends AuthGuard('github') {
+  getAuthenticateOptions(context: ExecutionContext) {
+    const req = context.switchToHttp().getRequest();
+
+    return {
+      state: req.query.state || 'web',
+    };
+  }
+}
