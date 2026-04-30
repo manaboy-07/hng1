@@ -114,35 +114,52 @@ export class AuthService {
     });
   }
   // auth.service.ts
+  // auth.service.ts
+
   async handleManualGithubAuth(code: string, codeVerifier: string) {
     try {
-      // 1. Exchange code for GitHub token
-      const response = await axios.post(
+      // 1. Exchange code for GitHub Access Token
+      // Note: We don't send code_verifier to GitHub here because
+      // GitHub uses Client Secret for "Web Application" types.
+      const tokenResponse = await axios.post(
         'https://github.com/login/oauth/access_token',
         {
           client_id: process.env.GITHUB_CLIENT_ID,
           client_secret: process.env.GITHUB_CLIENT_SECRET,
-          code,
-          code_verifier: codeVerifier, // PKCE
+          code: code,
+          redirect_uri:
+            'https://hng1-production-f8e7.up.railway.app/auth/github/callback', // Must match GitHub Settings!
         },
         { headers: { Accept: 'application/json' } },
       );
 
-      if (!response.data.access_token) return null;
+      const accessToken = tokenResponse.data.access_token;
 
-      // 2. Get User
-      const userRes = await axios.get('https://api.github.com/user', {
-        headers: { Authorization: `Bearer ${response.data.access_token}` },
+      if (!accessToken) {
+        console.error('GitHub Token Exchange Failed:', tokenResponse.data);
+        return null;
+      }
+
+      // 2. Get User Profile
+      const userResponse = await axios.get('https://api.github.com/user', {
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
 
-      // 3. Your existing user validation/JWT generation
+      const profile = userResponse.data;
+
+      // 3. Find/Create User in your DB and return JWTs
+      // Pass the profile to your existing logic
       return await this.valaidateOauthUSer({
-        github_id: userRes.data.id.toString(),
-        username: userRes.data.login,
-        email: userRes.data.email,
-        avatar_url: userRes.data.avatar_url,
+        github_id: profile.id.toString(),
+        username: profile.login,
+        email: profile.email || `${profile.login}@github.com`,
+        avatar_url: profile.avatar_url,
       });
-    } catch (e) {
+    } catch (error) {
+      console.error(
+        'Manual Auth Error:',
+        error.response?.data || error.message,
+      );
       return null;
     }
   }
