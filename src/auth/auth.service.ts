@@ -118,9 +118,9 @@ export class AuthService {
 
   async handleManualGithubAuth(code: string, codeVerifier: string) {
     try {
-      // 1. Exchange code for GitHub Access Token
-      // Note: We don't send code_verifier to GitHub here because
-      // GitHub uses Client Secret for "Web Application" types.
+      console.log('--- GitHub Exchange Start ---');
+
+      // 1. Exchange code for GitHub token
       const tokenResponse = await axios.post(
         'https://github.com/login/oauth/access_token',
         {
@@ -128,38 +128,49 @@ export class AuthService {
           client_secret: process.env.GITHUB_CLIENT_SECRET,
           code: code,
           redirect_uri:
-            'https://hng1-production-f8e7.up.railway.app/auth/github/callback', // Must match GitHub Settings!
+            ' https://hng1-production-f8e7.up.railway.app/auth/github/callback', // Must match GitHub Settings!
         },
         { headers: { Accept: 'application/json' } },
       );
 
-      const accessToken = tokenResponse.data.access_token;
-
-      if (!accessToken) {
-        console.error('GitHub Token Exchange Failed:', tokenResponse.data);
+      // GitHub returns errors in the body with a 200 status code
+      if (tokenResponse.data.error) {
+        console.error(
+          'GitHub API Error:',
+          tokenResponse.data.error_description || tokenResponse.data.error,
+        );
         return null;
       }
+
+      const accessToken = tokenResponse.data.access_token;
+      if (!accessToken) return null;
 
       // 2. Get User Profile
       const userResponse = await axios.get('https://api.github.com/user', {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
-      const profile = userResponse.data;
+      // 3. Get User Email (GitHub sometimes hides emails)
+      let email = userResponse.data.email;
+      if (!email) {
+        const emailResponse = await axios.get(
+          'https://api.github.com/user/emails',
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          },
+        );
+        email = emailResponse.data.find((e: any) => e.primary)?.email;
+      }
 
-      // 3. Find/Create User in your DB and return JWTs
-      // Pass the profile to your existing logic
+      // 4. Validate/Create User in your DB
       return await this.valaidateOauthUSer({
-        github_id: profile.id.toString(),
-        username: profile.login,
-        email: profile.email || `${profile.login}@github.com`,
-        avatar_url: profile.avatar_url,
+        github_id: userResponse.data.id.toString(),
+        username: userResponse.data.login,
+        email: email || `${userResponse.data.login}@github.com`,
+        avatar_url: userResponse.data.avatar_url,
       });
     } catch (error) {
-      console.error(
-        'Manual Auth Error:',
-        error.response?.data || error.message,
-      );
+      console.error('Manual Auth Exception:', error.message);
       return null;
     }
   }
