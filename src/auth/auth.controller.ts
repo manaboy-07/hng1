@@ -32,68 +32,11 @@ export class AuthController {
   @Get('github')
   @UseGuards(GithubAuthGuard)
   github() {}
-
   @Public()
   @Get('github/callback')
+  @UseGuards(GithubAuthGuard)
   async githubCallback(@Req() req: any, @Res() res: Response) {
     try {
-      const { code, state } = req.query;
-
-      const validStates = ['web', 'api', 'cli', 'test'];
-
-      if (!code) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'Missing code',
-        });
-      }
-
-      // 2. Reject missing state
-      if (!state) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'Missing state',
-        });
-      }
-
-      // 3. Reject invalid state
-      if (!validStates.includes(state)) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'Invalid state',
-        });
-      }
-
-      // ---------------------------
-      // 🧪 TEST MODE (grader bypass)
-      // ---------------------------
-      if (code === 'test_code') {
-        let admin = await this.prisma.user.findFirst({
-          where: { role: 'ADMIN' },
-        });
-
-        if (!admin) {
-          admin = await this.authService.createTestAdmin();
-        }
-
-        const tokens = this.authService.generateToken(admin);
-
-        await this.prisma.user.update({
-          where: { id: admin.id },
-          data: { refresh_token: tokens.refresh_token },
-        });
-
-        this.setCookies(res, tokens);
-
-        return res.json({
-          status: 'success',
-          ...tokens,
-        });
-      }
-
-      // ---------------------------
-      // 🔵 REAL GITHUB LOGIN
-      // ---------------------------
       if (!req.user) {
         return res.status(401).json({
           status: 'error',
@@ -105,6 +48,8 @@ export class AuthController {
 
       this.setCookies(res, tokens);
 
+      const state = req.query.state || 'web';
+
       if (state === 'cli') {
         return res.redirect(
           `http://localhost:4242/callback?access_token=${tokens.access_token}&refresh_token=${tokens.refresh_token}`,
@@ -112,14 +57,11 @@ export class AuthController {
       }
 
       if (state === 'api') {
-        return res.json({
-          status: 'success',
-          ...tokens,
-        });
+        return res.json({ status: 'success', ...tokens });
       }
 
       return res.redirect(process.env.FRONTEND_URL!);
-    } catch (err) {
+    } catch {
       return res.status(500).json({
         status: 'error',
         message: 'OAuth callback failed',
