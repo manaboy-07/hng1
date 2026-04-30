@@ -13,7 +13,7 @@ import { JWTAuthGuard } from './guards/jwt.guard';
 @Module({
   imports: [
     PrismaModule,
-    PassportModule,
+    PassportModule.register({ session: false }),
     JwtModule.register({
       secret: process.env.JWT_SECRET!,
       signOptions: { expiresIn: '1d' },
@@ -26,7 +26,7 @@ import { JWTAuthGuard } from './guards/jwt.guard';
     GithubStrategy,
     {
       provide: APP_GUARD,
-      useClass: JWTAuthGuard, //ensures user must be authenticated
+      useClass: JWTAuthGuard,
     },
     {
       provide: APP_GUARD,
