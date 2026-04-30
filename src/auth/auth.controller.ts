@@ -52,7 +52,7 @@ export class AuthController {
   @Get('github/callback')
   async githubCallback(@Req() req: any, @Res() res: Response) {
     try {
-      const { code, state, code_verifier } = req.query;
+      const { code, state } = req.query;
 
       if (!code) {
         return res.status(400).json({
@@ -91,13 +91,6 @@ export class AuthController {
         return res.json({
           status: 'success',
           ...tokens,
-        });
-      }
-
-      if (!code_verifier) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'Missing code_verifier',
         });
       }
 
