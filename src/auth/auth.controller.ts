@@ -34,6 +34,7 @@ export class AuthController {
 
   @Public()
   @Get('github/callback')
+  @UseGuards(GithubAuthGuard)
   async githubCallback(@Req() req: any, @Res() res: Response) {
     try {
       const { code, state, code_verifier } = req.query;
@@ -57,14 +58,7 @@ export class AuthController {
       }
 
       if (state === 'test') {
-        if (!code_verifier) {
-          return res.status(400).json({
-            status: 'error',
-            message: 'Missing code_verifier',
-          });
-        }
-
-        if (code_verifier !== 'valid_code_verifier') {
+        if (!code_verifier || code_verifier !== 'valid_code_verifier') {
           return res.status(400).json({
             status: 'error',
             message: 'Invalid code_verifier',
@@ -101,40 +95,32 @@ export class AuthController {
         });
       }
 
-      return new Promise((resolve, reject) => {
-        (new GithubAuthGuard() as any).canActivate(req, res, async () => {
-          try {
-            if (!req.user) {
-              return res.status(401).json({
-                status: 'error',
-                message: 'OAuth failed - no user',
-              });
-            }
-
-            const tokens = await this.authService.valaidateOauthUSer(req.user);
-
-            this.setCookies(res, tokens);
-
-            if (state === 'cli') {
-              return res.redirect(
-                `http://localhost:4242/callback?access_token=${tokens.access_token}&refresh_token=${tokens.refresh_token}`,
-              );
-            }
-
-            if (state === 'api') {
-              return res.json({
-                status: 'success',
-                ...tokens,
-              });
-            }
-
-            return res.redirect(process.env.FRONTEND_URL!);
-          } catch (err) {
-            reject(err);
-          }
+      if (!req.user) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'OAuth failed - no user',
         });
-      });
-    } catch {
+      }
+
+      const tokens = await this.authService.valaidateOauthUSer(req.user);
+
+      this.setCookies(res, tokens);
+
+      if (state === 'cli') {
+        return res.redirect(
+          `http://localhost:4242/callback?access_token=${tokens.access_token}&refresh_token=${tokens.refresh_token}`,
+        );
+      }
+
+      if (state === 'api') {
+        return res.json({
+          status: 'success',
+          ...tokens,
+        });
+      }
+
+      return res.redirect(process.env.FRONTEND_URL!);
+    } catch (err) {
       return res.status(500).json({
         status: 'error',
         message: 'OAuth callback failed',
