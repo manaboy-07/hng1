@@ -34,7 +34,6 @@ export class AuthController {
 
   @Public()
   @Get('github/callback')
-  @UseGuards(GithubAuthGuard)
   async githubCallback(@Req() req: any, @Res() res: Response) {
     try {
       const { code, state, code_verifier } = req.query;
