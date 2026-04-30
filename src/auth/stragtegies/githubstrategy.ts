@@ -16,14 +16,19 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
       scope: ['user:email'],
     });
   }
-
-  async validate(accessToken: string, refreshToken: string, profile: any) {
-    console.log('in github strategy');
-    return {
-      githubId: profile.id,
-      username: profile.username,
-      email: profile.emails?.[0]?.value,
-      avatar: profile.photos?.[0]?.value,
+  async validate(
+    accessToken: string,
+    refreshToken: string,
+    profile: any,
+    done: Function,
+  ) {
+    const { username, emails, photos, id } = profile;
+    const user = {
+      github_id: id,
+      username: username,
+      email: emails?.[0]?.value,
+      avatar_url: photos?.[0]?.value,
     };
+    done(null, user);
   }
 }

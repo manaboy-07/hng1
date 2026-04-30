@@ -1,8 +1,10 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-
+import axios from 'axios';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
+import * as dotenv from 'dotenv';
 
+dotenv.config();
 @Injectable()
 export class AuthService {
   constructor(
@@ -110,5 +112,38 @@ export class AuthService {
         role: 'ADMIN',
       },
     });
+  }
+  // auth.service.ts
+  async handleManualGithubAuth(code: string, codeVerifier: string) {
+    try {
+      // 1. Exchange code for GitHub token
+      const response = await axios.post(
+        'https://github.com/login/oauth/access_token',
+        {
+          client_id: process.env.GITHUB_CLIENT_ID,
+          client_secret: process.env.GITHUB_CLIENT_SECRET,
+          code,
+          code_verifier: codeVerifier, // PKCE
+        },
+        { headers: { Accept: 'application/json' } },
+      );
+
+      if (!response.data.access_token) return null;
+
+      // 2. Get User
+      const userRes = await axios.get('https://api.github.com/user', {
+        headers: { Authorization: `Bearer ${response.data.access_token}` },
+      });
+
+      // 3. Your existing user validation/JWT generation
+      return await this.valaidateOauthUSer({
+        github_id: userRes.data.id.toString(),
+        username: userRes.data.login,
+        email: userRes.data.email,
+        avatar_url: userRes.data.avatar_url,
+      });
+    } catch (e) {
+      return null;
+    }
   }
 }
