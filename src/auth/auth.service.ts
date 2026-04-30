@@ -13,12 +13,12 @@ export class AuthService {
   async valaidateOauthUSer(profile: any) {
     //find user in db with githubid else create user to the db
     let user = await this.prismaService.user.findUnique({
-      where: { github_id: profile.githubId },
+      where: { github_id: profile.id },
     });
     if (!user) {
       user = await this.prismaService.user.create({
         data: {
-          github_id: profile.githubId,
+          github_id: profile.id,
           username: profile.username,
           email: profile.email,
           avatar_url: profile.avatar,
@@ -41,7 +41,7 @@ export class AuthService {
     const payload = {
       sub: user.id, //willl be used for refresh token too
       role: user.role,
-      github_id: user.githubId,
+      github_id: user.github_id,
       username: user.username,
       email: user.email,
       avatar_url: user.avatar_url,
@@ -61,28 +61,27 @@ export class AuthService {
 
   async validateAndUpdateRefreshToken(refresh_token: string) {
     const payload = this.jwtService.verify(refresh_token);
-    //refresh token is already stored in the db
+    console.log(payload);
+
     const user = await this.prismaService.user.findUnique({
       where: { id: payload.sub },
     });
-    //check if user exists or if refresh token matches
+
     if (!user || user.refresh_token !== refresh_token) {
       throw new UnauthorizedException('Invalid refresh token');
     }
-    //rotate tokens
+
     const tokens = this.generateToken(user);
+
     await this.prismaService.user.update({
       where: { id: user.id },
       data: {
         refresh_token: tokens.refresh_token,
       },
     });
-    return {
-      status: 'success',
-      ...tokens,
-    };
-  }
 
+    return tokens;
+  }
   async logOut(refresh_token: string) {
     const payload = this.jwtService.verify(refresh_token);
     await this.prismaService.user.update({
@@ -94,5 +93,22 @@ export class AuthService {
     return {
       status: 'success',
     };
+  }
+  //Admins them
+  async getAdminUser() {
+    return this.prismaService.user.findFirst({
+      where: { role: 'ADMIN' },
+    });
+  }
+
+  async createTestAdmin() {
+    return this.prismaService.user.create({
+      data: {
+        github_id: 'test_admin',
+        username: 'test_admin',
+        email: 'admin@test.com',
+        role: 'ADMIN',
+      },
+    });
   }
 }

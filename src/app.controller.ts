@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Query,
+  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
@@ -21,7 +22,7 @@ import { ApiVersionGuard } from './auth/guards/api-version.guard';
 import { CsvService } from './csv/csv.service';
 import type { Response } from 'express';
 
-@UseGuards(ApiVersionGuard, JWTAuthGuard)
+@UseGuards(JWTAuthGuard)
 @Controller('api')
 export class AppController {
   constructor(
@@ -33,19 +34,20 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
-
+  @UseGuards(ApiVersionGuard)
   @Roles(Role.ADMIN)
   @Post('profiles')
   async createProfile(@Body() createDto: CreateDto) {
     return await this.appService.createProfile(createDto);
   }
-
+  @UseGuards(ApiVersionGuard)
   @Get('profiles/search')
   async searchProfiles(@Query() q: string) {
     return await this.appService.SearchProfiles(q);
   }
 
-  // @Roles(Role.ADMIN)
+  @UseGuards(ApiVersionGuard)
+  @Roles(Role.ADMIN)
   @Get('profiles/export')
   async exportCsv(@Query() query: QueryDto, @Res() res: Response) {
     if (query.format !== 'csv') {
@@ -63,19 +65,28 @@ export class AppController {
     res.status(200).send(csv);
   }
 
+  @UseGuards(ApiVersionGuard)
   @Get('profiles')
   async getAllProfiles(@Query() query: QueryDto) {
     return await this.appService.GetAllProfiles(query);
   }
-
+  @UseGuards(ApiVersionGuard)
   @Get('profiles/:id')
   async getProfileByID(@Param('id') id: string) {
     return await this.appService.GetProfileByID(id);
   }
-
+  @UseGuards(ApiVersionGuard)
   @Roles(Role.ADMIN)
   @Delete('profiles/:id')
   async deteleProfile(@Param('id') id: string) {
     return await this.appService.deleteProfile(id);
+  }
+
+  @Get('/users/me')
+  me(@Req() req) {
+    return {
+      status: 'success',
+      user: req.user,
+    };
   }
 }

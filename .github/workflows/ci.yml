@@ -1,4 +1,4 @@
-name: Insighta Backend CI
+name: CI Pipeline
 
 on:
   push:
@@ -10,25 +10,28 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: ./backend
+    strategy:
+      matrix:
+        node-version: [18.x]
 
     steps:
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18
           cache: npm
 
       - name: Install dependencies
         run: npm install
 
+      - name: Run lint
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+
       - name: Build project
         run: npm run build
-
-      - name: Run tests (optional)
-        run: npm test --if-present

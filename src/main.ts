@@ -13,15 +13,11 @@ async function bootstrap() {
   app.use(cookieParser());
   app.useGlobalFilters(new ThrottlerExceptionFilter());
   app.useGlobalInterceptors(new LoggingInterceptor());
+
   app.enableCors({
-    origin: [
-      'http://localhost:3001',
-      'https://insighta-dun.vercel.app',
-      'http://localhost:4242',
-    ],
+    origin: true,
     credentials: true,
   });
-
   const port = process.env.PORT || 3000;
   await app.listen(port, '0.0.0.0');
 }
