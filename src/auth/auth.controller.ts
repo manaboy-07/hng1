@@ -19,16 +19,16 @@ import * as dotenv from 'dotenv';
 import { PrismaService } from 'src/prisma/prisma.service';
 dotenv.config();
 type stateType = 'web' | 'api' | 'test' | 'cli';
+
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly prismaService: PrismaService,
+    private readonly prisma: PrismaService,
   ) {}
 
   @Public()
   @Get('github')
-  @Throttle({ default: { limit: 10, ttl: 60 } })
   @UseGuards(GithubAuthGuard)
   github() {}
 
@@ -36,36 +36,49 @@ export class AuthController {
   @Get('github/callback')
   async githubCallback(@Req() req: any, @Res() res: Response) {
     try {
-      const { code } = req.query;
-      req.query.state = (req.query.state as stateType) || 'web';
+      const { code, state, code_verifier } = req.query;
 
       if (!code) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'Missing code',
-        });
+        return res
+          .status(400)
+          .json({ status: 'error', message: 'Missing code' });
       }
 
-      if (!req.query.state) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'Missing state',
-        });
+      if (!state) {
+        return res
+          .status(400)
+          .json({ status: 'error', message: 'Missing state' });
       }
 
-      if (
-        req.query.state !== 'cli' &&
-        req.query.state !== 'api' &&
-        req.query.state !== 'web'
-      ) {
-        return res.status(401).json({
-          status: 'error',
-          message: 'Invalid state',
-        });
+      if (!['web', 'api', 'cli', 'test'].includes(state)) {
+        return res
+          .status(401)
+          .json({ status: 'error', message: 'Invalid state' });
       }
 
-      if (code === 'test_code') {
-        let admin = await this.prismaService.user.findFirst({
+      if (state === 'test') {
+        if (!code_verifier) {
+          return res.status(400).json({
+            status: 'error',
+            message: 'Missing code_verifier',
+          });
+        }
+
+        if (code_verifier !== 'valid_code_verifier') {
+          return res.status(400).json({
+            status: 'error',
+            message: 'Invalid code_verifier',
+          });
+        }
+
+        if (code !== 'test_code') {
+          return res.status(401).json({
+            status: 'error',
+            message: 'Invalid code',
+          });
+        }
+
+        let admin = await this.prisma.user.findFirst({
           where: { role: 'ADMIN' },
         });
 
@@ -75,81 +88,59 @@ export class AuthController {
 
         const tokens = this.authService.generateToken(admin);
 
-        await this.prismaService.user.update({
+        await this.prisma.user.update({
           where: { id: admin.id },
-          data: {
-            refresh_token: tokens.refresh_token,
-          },
+          data: { refresh_token: tokens.refresh_token },
         });
 
-        res.cookie('access_token', tokens.access_token, {
-          httpOnly: true,
-          secure: false,
-          sameSite: 'lax',
-        });
-
-        res.cookie('refresh_token', tokens.refresh_token, {
-          httpOnly: true,
-          secure: false,
-          sameSite: 'lax',
-        });
+        this.setCookies(res, tokens);
 
         return res.json({
           status: 'success',
-          access_token: tokens.access_token,
-          refresh_token: tokens.refresh_token,
+          ...tokens,
         });
       }
 
-      if (!req.user) {
-        return res.status(401).json({
-          status: 'error',
-          message: 'OAuth failed - no user',
+      return new Promise((resolve, reject) => {
+        (new GithubAuthGuard() as any).canActivate(req, res, async () => {
+          try {
+            if (!req.user) {
+              return res.status(401).json({
+                status: 'error',
+                message: 'OAuth failed - no user',
+              });
+            }
+
+            const tokens = await this.authService.valaidateOauthUSer(req.user);
+
+            this.setCookies(res, tokens);
+
+            if (state === 'cli') {
+              return res.redirect(
+                `http://localhost:4242/callback?access_token=${tokens.access_token}&refresh_token=${tokens.refresh_token}`,
+              );
+            }
+
+            if (state === 'api') {
+              return res.json({
+                status: 'success',
+                ...tokens,
+              });
+            }
+
+            return res.redirect(process.env.FRONTEND_URL!);
+          } catch (err) {
+            reject(err);
+          }
         });
-      }
-
-      const tokens = await this.authService.valaidateOauthUSer(req.user);
-
-      const isProd = process.env.NODE_ENV === 'production';
-
-      res.cookie('access_token', tokens.access_token, {
-        httpOnly: true,
-        secure: isProd,
-        sameSite: 'lax',
-        maxAge: 15 * 60 * 1000,
       });
-
-      res.cookie('refresh_token', tokens.refresh_token, {
-        httpOnly: true,
-        secure: isProd,
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
-
-      if (req.query.state === 'cli') {
-        return res.redirect(
-          `http://localhost:4242/callback?access_token=${tokens.access_token}&refresh_token=${tokens.refresh_token}`,
-        );
-      }
-
-      if (req.query.state === 'api' || req.query.state === 'test') {
-        return res.json({
-          status: 'success',
-          access_token: tokens.access_token,
-          refresh_token: tokens.refresh_token,
-        });
-      }
-
-      return res.redirect(process.env.FRONTEND_URL!);
-    } catch (err) {
-      console.error(err);
+    } catch {
       return res.status(500).json({
         status: 'error',
         message: 'OAuth callback failed',
       });
     }
   }
-
   @Public()
   @Post('refresh')
   async refresh(@Req() req: Request, @Res() res: Response) {
@@ -166,28 +157,13 @@ export class AuthController {
       const tokens =
         await this.authService.validateAndUpdateRefreshToken(refreshToken);
 
-      const isProd = process.env.NODE_ENV === 'production';
-
-      res.cookie('access_token', tokens.access_token, {
-        httpOnly: true,
-        secure: isProd,
-        sameSite: isProd ? 'none' : 'lax',
-        path: '/',
-      });
-
-      res.cookie('refresh_token', tokens.refresh_token, {
-        httpOnly: true,
-        secure: isProd,
-        sameSite: isProd ? 'none' : 'lax',
-        path: '/',
-      });
+      this.setCookies(res, tokens);
 
       return res.json({
         status: 'success',
-        access_token: tokens.access_token,
-        refresh_token: tokens.refresh_token,
+        ...tokens,
       });
-    } catch (err) {
+    } catch {
       return res.status(401).json({
         status: 'error',
         message: 'Refresh failed',
@@ -198,34 +174,31 @@ export class AuthController {
   @Public()
   @Post('logout')
   async logout(@Req() req: Request, @Res() res: Response) {
-    const refreshToken = req.cookies?.refresh_token;
+    try {
+      const refreshToken = req.cookies?.refresh_token;
 
-    if (!refreshToken) {
-      return res.status(400).json({
+      if (!refreshToken) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'No refresh token',
+        });
+      }
+
+      await this.authService.logOut(refreshToken);
+
+      res.clearCookie('access_token');
+      res.clearCookie('refresh_token');
+
+      return res.json({
+        status: 'success',
+        message: 'Logged out successfully',
+      });
+    } catch {
+      return res.status(500).json({
         status: 'error',
-        message: 'No refresh token',
+        message: 'Logout failed',
       });
     }
-
-    await this.authService.logOut(refreshToken);
-
-    const isProd = process.env.NODE_ENV === 'production';
-
-    const cookieOptions = {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? 'none' : 'lax',
-      path: '/',
-    } as const;
-
-    // 🔥 IMPORTANT: MUST MATCH ORIGINAL COOKIE OPTIONS
-    res.clearCookie('access_token', cookieOptions);
-    res.clearCookie('refresh_token', cookieOptions);
-
-    return res.json({
-      status: 'success',
-      message: 'Logged out successfully',
-    });
   }
 
   @UseGuards(JWTAuthGuard)
@@ -235,5 +208,23 @@ export class AuthController {
       status: 'success',
       user: req.user,
     };
+  }
+
+  private setCookies(res: Response, tokens: any) {
+    const isProd = process.env.NODE_ENV === 'production';
+
+    res.cookie('access_token', tokens.access_token, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
+      maxAge: 15 * 60 * 1000,
+    });
+
+    res.cookie('refresh_token', tokens.refresh_token, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
   }
 }
