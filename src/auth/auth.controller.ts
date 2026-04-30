@@ -18,7 +18,7 @@ import { Throttle } from '@nestjs/throttler';
 import * as dotenv from 'dotenv';
 import { PrismaService } from 'src/prisma/prisma.service';
 dotenv.config();
-
+type stateType = 'web' | 'api' | 'test' | 'cli';
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -36,7 +36,8 @@ export class AuthController {
   @Get('github/callback')
   async githubCallback(@Req() req: any, @Res() res: Response) {
     try {
-      const { code, state } = req.query;
+      const { code } = req.query;
+      req.query.state = (req.query.state as stateType) || 'web';
 
       if (!code) {
         return res.status(400).json({
@@ -45,14 +46,18 @@ export class AuthController {
         });
       }
 
-      if (!state) {
+      if (!req.query.state) {
         return res.status(400).json({
           status: 'error',
           message: 'Missing state',
         });
       }
 
-      if (state !== 'cli' && state !== 'api' && state !== 'web') {
+      if (
+        req.query.state !== 'cli' &&
+        req.query.state !== 'api' &&
+        req.query.state !== 'web'
+      ) {
         return res.status(401).json({
           status: 'error',
           message: 'Invalid state',
@@ -121,13 +126,13 @@ export class AuthController {
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
-      if (state === 'cli') {
+      if (req.query.state === 'cli') {
         return res.redirect(
           `http://localhost:4242/callback?access_token=${tokens.access_token}&refresh_token=${tokens.refresh_token}`,
         );
       }
 
-      if (state === 'api' || state === 'test') {
+      if (req.query.state === 'api' || req.query.state === 'test') {
         return res.json({
           status: 'success',
           access_token: tokens.access_token,
