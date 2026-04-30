@@ -26,9 +26,9 @@ jobs:
           --health-retries 5
 
     env:
-      DATABASE_URL: postgresql://user:password@localhost:5432/insighta_test
-      JWT_SECRET: test_secret
-      GITHUB_CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID }} # Uses GitHub Secrets
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      GITHUB_CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID }}
       GITHUB_CLIENT_SECRET: ${{ secrets.GITHUB_CLIENT_SECRET }}
 
     steps:
@@ -40,6 +40,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
 
       - name: Run Build
         run: npm run build
