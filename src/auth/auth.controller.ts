@@ -25,7 +25,23 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly prismaService: PrismaService,
   ) {}
+  private setCookies(res: Response, tokens: any) {
+    const isProd = process.env.NODE_ENV === 'production';
 
+    res.cookie('access_token', tokens.access_token, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
+      maxAge: 15 * 60 * 1000,
+    });
+
+    res.cookie('refresh_token', tokens.refresh_token, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+  }
   @Public()
   @Get('github')
   @Throttle({ default: { limit: 10, ttl: 60 } })
@@ -45,14 +61,9 @@ export class AuthController {
         });
       }
 
-      if (!state) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'Missing state',
-        });
-      }
+      const client = (state as string) || 'web';
 
-      if (state !== 'cli' && state !== 'api' && state !== 'web') {
+      if (!['cli', 'api', 'web'].includes(client)) {
         return res.status(401).json({
           status: 'error',
           message: 'Invalid state',
@@ -72,35 +83,24 @@ export class AuthController {
 
         await this.prismaService.user.update({
           where: { id: admin.id },
-          data: {
-            refresh_token: tokens.refresh_token,
-          },
+          data: { refresh_token: tokens.refresh_token },
         });
 
-        res.cookie('access_token', tokens.access_token, {
-          httpOnly: true,
-          secure: false,
-          sameSite: 'lax',
-        });
-
-        res.cookie('refresh_token', tokens.refresh_token, {
-          httpOnly: true,
-          secure: false,
-          sameSite: 'lax',
-        });
+        this.setCookies(res, tokens);
 
         return res.json({
           status: 'success',
-          access_token: tokens.access_token,
-          refresh_token: tokens.refresh_token,
+          ...tokens,
         });
       }
+
       if (!code_verifier) {
         return res.status(400).json({
           status: 'error',
           message: 'Missing code_verifier',
         });
       }
+
       if (!req.user) {
         return res.status(401).json({
           status: 'error',
@@ -110,33 +110,18 @@ export class AuthController {
 
       const tokens = await this.authService.valaidateOauthUSer(req.user);
 
-      const isProd = process.env.NODE_ENV === 'production';
+      this.setCookies(res, tokens);
 
-      res.cookie('access_token', tokens.access_token, {
-        httpOnly: true,
-        secure: false,
-        sameSite: 'lax',
-        maxAge: 15 * 60 * 1000,
-      });
-
-      res.cookie('refresh_token', tokens.refresh_token, {
-        httpOnly: true,
-        secure: false,
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
-
-      if (state === 'cli') {
+      if (client === 'cli') {
         return res.redirect(
           `http://localhost:4242/callback?access_token=${tokens.access_token}&refresh_token=${tokens.refresh_token}`,
         );
       }
 
-      if (state === 'api' || state === 'test') {
+      if (client === 'api') {
         return res.json({
           status: 'success',
-          access_token: tokens.access_token,
-          refresh_token: tokens.refresh_token,
+          ...tokens,
         });
       }
 
